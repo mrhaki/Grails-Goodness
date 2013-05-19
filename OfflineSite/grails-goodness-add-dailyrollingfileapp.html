@@ -1,0 +1,61 @@
+<html>
+<head>
+
+<title>Grails Goodness: Add a DailyRollingFileAppender to Grails Logging</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Add a DailyRollingFileAppender to Grails Logging</h3>
+
+<div class="post">
+<p>In Grails we can add new Log4J appenders to our configuration. We must add the new appender definition in the <code>log4j</code> closure in <code>conf/Config.groovy</code>. We define new appenders with the <code>appenders()</code> method. We pass in a closure where we define our appenders. The name of the appender is an identifier we can use when we want to define the log level and packages that need to be logged by the appender.</p>
+<p>In the following sample configuration we create a <a href="http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/DailyRollingFileAppender.html">DailyRollingFileAppender</a> so each day a new log file is created and old log files are renamed with the date in the filename. Then we use the <code>root()</code> method to pass a closure telling we want to log all messages at level INFO to the appender.</p>
+<pre class="brush:groovy">
+// File: conf/Config.groovy
+import org.apache.log4j.DailyRollingFileAppender
+
+log4j = {
+    appenders {
+        appender new DailyRollingFileAppender(
+            name: 'dailyAppender',
+            datePattern: "'.'yyyy-MM-dd",  // See the API for all patterns.
+            fileName: "logs/${appName}.log",
+            layout: pattern(conversionPattern:'%d [%t] %-5p %c{2} %x - %m%n')        
+        )
+    }
+    
+    root {
+        info 'dailyAppender'
+    }    
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

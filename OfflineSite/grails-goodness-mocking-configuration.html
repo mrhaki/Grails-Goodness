@@ -1,0 +1,88 @@
+<html>
+<head>
+
+<title>Grails Goodness: Mocking the Configuration in Unit Tests</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Mocking the Configuration in Unit Tests</h3>
+
+<div class="post">
+<p>When we write a unit test for our Grails service and in the service we use <code>ConfigurationHolder.config</code> to get the Grails configuration we get <code>null</code> for the config object when we run the unit test. Which is fine for a unit test, because we want to provide values for the configuration in our test. This is easy to do: we use the <code>mockConfig</code> method to set configuration values for the unit test. The method accepts a <code>String</code> that is a configuration script.</p>
+<pre class="brush:groovy">
+// File: grails-app/services/SimpleService.groovy
+import org.codehaus.groovy.grails.common.ConfigurationHolder as GrailsConfig
+
+class SimpleService {
+    String say(text) {
+        "$GrailsConfig.config.simple.greeting $text"
+    }
+    
+    String sayConfig() {
+        say(GrailsConfig.config.simple.text)
+    }
+}
+</pre>
+<pre class="brush:groovy">
+// File: test/unit/SimpleServiceTests.groovy
+import grails.test.*
+
+class SimpleServiceTests extends GrailsUnitTestCase {
+    def service
+    
+    protected void setUp() {
+        super.setUp()
+        service = new SimpleService()
+        
+        mockConfig('''
+            simple {
+                greeting = 'Hello'
+                text = 'world.'
+            }
+        ''')
+    }
+    
+    protected void tearDown() {
+        super.tearDown()
+        service = null
+    }
+    
+    void testSayConfig() {
+        assertEquals 'Hello world.', service.sayConfig()
+    }
+    
+    void testSay() {
+        assertEquals 'Hello mrhaki', service.say('mrhaki')
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

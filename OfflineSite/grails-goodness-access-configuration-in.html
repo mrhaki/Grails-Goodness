@@ -1,0 +1,84 @@
+<html>
+<head>
+
+<title>Grails Goodness: Access Configuration in Grails Scripts</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Access Configuration in Grails Scripts</h3>
+
+<div class="post">
+<p>We can create our own scripts in Grails that can be executed from the command-line. To access values from the properties we have defined in <code>grails-app/conf/Config.groovy</code> we must start with adding the following line to the top of our script:</p>
+<pre class="brush:groovy;light:true">
+includeTargets &lt;&lt; grailsScript('_GrailsPackage')
+</pre>
+<p>With this include we get access to the <code>checkConfig</code> task.</p>
+<p>Next we must execute this task after the <code>compile</code> task to get a <code>config</code> variable in our script. The script variable <code>config</code> contains the values of our configuration defined in the Grails configuration files.</p>
+<p>The following script contains some sample configuration properties for different environments.</p>
+<pre class="brush:groovy">
+// File: grails-app/conf/Config.groovy
+...
+
+blog.sample = 'Blog sample'
+environments {
+    development {
+        blog.sample = 'Value for development'
+    }
+}
+
+...
+</pre>
+<p>Let's create a new script <code>Sample.groovy</code> with the following command: <code>$ grails create-script sample</code>. We open the file and add:
+<pre class="brush:groovy">
+// File: scripts/Sample.groovy
+includeTargets &lt;&lt; grailsScript('_GrailsPackage')
+
+target('sample': 'Show usage of configuration information in Grails scripts.') {
+    depends(compile, createConfig)
+
+    println 'Sample = ' + config.blog.sample
+}
+
+setDefaultTarget 'sample'
+</pre>
+<p>If we execute our task with <code>$ grails sample</code> we get the following output:</p>
+<pre class="brush:plain">
+Sample = Value for development
+</pre>
+<p>And if we run <code>$ grails test sample</code> we get:</p>
+
+<pre class="brush:plain">
+Sample = Blog Sample
+</pre>
+
+<p>The original source for this information is <a href="http://grails.1312388.n4.nabble.com/how-to-access-application-config-from-custom-scripts-td3239051.html">Grails mailing list</a>.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

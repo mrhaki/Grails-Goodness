@@ -1,0 +1,80 @@
+<html>
+<head>
+
+<title>Grails Goodness: Customize the URL Format</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Customize the URL Format</h3>
+
+<div class="post">
+<p>Starting from Grails 2.0 we can change the URL format in our application. Default a camel case convention is used for the URLs. For example a controller <em>SampleAppController</em> with an action <em>showSamplePage</em> results in the following URL <em>/sampleApp/showSamplePage</em>.</p><p>We can change this convention by creating a new class that implements the <code>grails.web.UrlConverter</code> interface. Grails already provides the custom UrlConverter <code>grails.web.HyphenatedUrlConverter</code>. This converter will add hyphens to the URL where there are uppercase characters and the uppercase character is converted to lowercase. Our sample controller and action result in the following URL with the <code>HyphenatedUrlConverter</code>: <em>/sample-app/show-sample-page</em>.</p><p>Because Grails already provides this UrlConverter it is very easy to configure. We only need to change our configuration in <em>grails-app/conf/Config.groovy</em>. We add the key <em>grails.web.url.converter</em> with the value <em>hyphenated</em>:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+grails.web.url.converter = 'hyphenated'
+...
+</pre><p>But we can implement our own class with the <code>grails.web.UrlConverter</code> interface to define our own URL format to be used in the Grails application. The interface only has one method <em>String toUrlElement(String)</em> we need to implement. The input argument is the name of the controller or action that needs to be converted. We cannot see if the value is a controller or action value, the conversion rules will be applied to both controller and action values. The following class is a sample implementation. The controller or action name is first converted to lowercase. Next we add the extension <em>-grails</em> to the controller or action. We make sure the conversion is not already done by checking if the extension is not already in place. This check is necessary because Grails will invoke our UrlConverter several times to map it to the correct controller and action names. And without the check the extension would be added again and again and again, resulting in a 404 page not found error.</p><pre class="brush:groovy">// File: src/groovy/customize/url/format/CustomUrlConverter.groovy
+package customize.url.format
+
+import grails.web.UrlConverter
+import org.apache.commons.lang.StringUtils
+
+class CustomUrlConverter implements UrlConverter {
+    private static final String GRAILS_EXTENSION = '-grails'
+
+    String toUrlElement(String propertyOrClassName) {
+        if (StringUtils.isBlank(propertyOrClassName)) {
+            propertyOrClassName
+        } else {
+            String lowerPropertyOrClassName = propertyOrClassName.toLowerCase()
+            String extendedPropertyOrClassName = addGrailsExtension(lowerPropertyOrClassName)
+            extendedPropertyOrClassName
+        }
+    }
+
+    private String addGrailsExtension(String propertyOrClassName) {
+        if (propertyOrClassName.endsWith(GRAILS_EXTENSION)) {
+            propertyOrClassName
+        } else {
+            propertyOrClassName + GRAILS_EXTENSION
+        }
+    }
+}
+</pre><p>We have our custom UrlConverter. Now we need to configure our Grails application to use it. This time we don't change the configuration <em>grails-app/conf/Config.groovy</em>, but we add our custom implementation to the Spring configuration in <em>grails-app/conf/spring/resources.groovy</em>. If we use the name with the value of the constant <code>grails.web.UrlConverter.BEAN_NAME</code> for our implementation then Grails will use our custom UrlConverter. We can remove any <em>grails.web.url.converter</em> from <em>Config.groovy</em>, because it will not be used.</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import static grails.web.UrlConverter.BEAN_NAME as UrlConverterBean
+
+beans = {
+...
+    "${UrlConverterBean}"(customize.url.format.CustomUrlConverter)
+...
+}
+</pre><p>We are done. If we start our application then we use the URL <em>/sampleapp-grails/showsamplepage-grails</em> to access the controller <em>SampleAppController</em> and the method <em>showSamplePage()</em> in the controller.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

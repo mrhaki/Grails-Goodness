@@ -1,0 +1,78 @@
+<html>
+<head>
+
+<title>Grails Goodness: Binding Method Arguments in Controller Methods</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Binding Method Arguments in Controller Methods</h3>
+
+<div class="post">
+<p>Since Grails 2.0 we can use methods instead of closures to define actions for our controllers. We already could pass a command object to a method as argument, but we can also use primitive typed arguments in our method definition. The name of the argument is the name of the request parameter we pass to the controller. Grails will automatically convert the request parameter to the type we have used in our method definition. If the type conversion fails then the parameter will be null.</p><p>Let's create a method in a controller with three arguments: a String typed argument with the names <em>author</em> and <em>book</em>. And an argument with type Long with the name <em>id</em>.</p><pre class="brush:groovy">// File: grails-app/controllers/sample/MethodSampleController.groovy
+package sample
+
+class MethodSampleController {
+    /**
+     * Sample method with 3 arguments.
+     *
+     * @param author Name of author
+     * @param id Identifier for author
+     * @param book Book title 
+     */
+    def sample(final String author, final Long id, final String book) {
+        render "Params: author = $author, book= $book, id = $id"
+    }
+
+}
+</pre><p>If we invoke our controller with http://localhost:8080/grails-samples/methodSample/sample?id=100&book=It&author=Stephen%20King we get the following output:</p><pre class="brush:plain;light:true">Params: name= Stephen King, book = It, id = 100
+</pre><p>Suppose we don't provide a valid long value for the id parameter we see in the output id is null. We use the following URL http://localhost:8080/grails-samples/methodSample/sample?id=1a&book=The%20Stand&author=Stephen%20King.</p><pre class="brush:plain;light:true">Params: author = Stephen King, book = The Stand, id = null
+</pre><p>After reading <a href="http://www.intelligrape.com/blog/2012/02/20/grails-2-0-action-arguments-data-binding/">this blog post</a> and looking at the <a href="http://grails.org/doc/latest/guide/theWebLayer.html#dataBinding">Grails documentation</a> I learned we can even change the name of the argument and map it to a request parameter name with the <code>@RequestParameter</code> annotation. So then the name of the argument and the request parameter don't have to be the same.</p><p>Let's change our sample method and see what the output is:</p><pre class="brush:groovy">// File: grails-app/controllers/sample/MethodSampleController.groovy
+package sample
+
+import grails.web.RequestParameter
+
+class MethodSampleController {
+    /**
+     * Sample method with 3 arguments.
+     *
+     * @param author Name of author
+     * @param id Identifier for author
+     * @param book Book title 
+     */
+    def sample(final String author, @RequestParameter('identifier') final Long id, @RequestParameter('bookTitle') final String book) {
+        render "Params: author = $author, book = $book, id = $id"
+    }
+
+}
+</pre><p>Now we need the following URL to see correct output: http://localhost:8080/controllers/author/sample?bookTitle=It&identifier=200&author=Stephen%20King.</p><pre class="brush:plain;light:true">Params: name= Stephen King, book = It, id = 200
+</pre><br /
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<html>
+<head>
+
+<title>Grails Goodness: Script Name Abbreviation</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Script Name Abbreviation</h3>
+
+<div class="post">
+<p>During <a href="http://gr8conf.eu">Gr8Conf 2012 Europe</a> I discovered Grails supports script name abbreviation. This means we don't have to type a complete script name, but only enough to make the script identifiable by Grails. It is inspired by Gradle's task name abbreviation feature. For example if we want to invoke the <code>help</code> script we only have to type the letter <code>h</code>. Or to invoke <code>run-app</code> we type <code>rA</code>. Notice we use uppercase characters for the letters after a hyphen in a script name. To invoke <code>create-tag-lib</code> we can type <code>cTL</code>.</p><p>If Grails cannot find a unique script name for the abbreviation we use we get a list of possible script names. We select the correct one to invoke the script. For example in the following output we see the options Grails shows when we type <code>gen</code> as a script name abbreviation:</p><pre class="brush:plain;light:true">$ grails gen
+| Script 'Gen' not found, did you mean:
+   1) GenerateAll
+   2) GenerateViews
+   3) GenerateController
+   4) InstallDependency
+   5) DependencyReport
+> Please make a selection or enter Q to quit: 
+</pre><p>This feature also works for script that we create ourselves or are added by plugins. For example if we create a script <em>GrailsGoodness</em> with the following content:</p><pre class="brush:groovy">includeTargets << grailsScript("_GrailsInit")
+
+target(main: "Demonstrate script name abbreviation") {
+    println "Showing script name abbreviation in Grails"
+}
+
+setDefaultTarget(main)
+</pre>
+<p>On the command-line or at the Grails prompt we can now use <code>gG</code> as a script name abbreviation and Grails will invoke the <em>GrailsGoodness</em> script:</p><pre class="brush:plain;light:true">$ grails gG
+| Environment set to development....
+Showing script name abbreviation in Grails
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

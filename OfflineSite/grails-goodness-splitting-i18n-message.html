@@ -1,0 +1,42 @@
+<html>
+<head>
+
+<title>Grails Goodness: Splitting i18n Message Bundles</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Splitting i18n Message Bundles</h3>
+
+<div class="post">
+<p>Grails <a href="http://grails.org/doc/latest/guide/10.%20Internationalization.html">supports internationalization</a> out of the box. In the directory <code>grails-app/i18n</code> we find a <code>messages.properties</code> with default Grails messages. We only have to make a new properties file where the name ends with the locale to add messages for another locale to our application.</p>
+<p>But we are not restricted to the basename <em>messages</em> for our message bundles. We can use any name as long as we place the file in the <code>grails-app/i18n</code> directory. For example we can create a file <code>views.properties</code> to store messages related to the Groovy Server Pages and a file <code>validation.properties</code> with messages related to validation of domain objects. And if we want specific messages for the Dutch locale for example we create <code>views_nl.properites</code> and <code>validation_nl.properties</code>.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

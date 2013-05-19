@@ -1,0 +1,70 @@
+<html>
+<head>
+
+<title>Grails Goodness: Get GrailsApplication and ApplicationContext in GSP</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Get GrailsApplication and ApplicationContext in GSP</h3>
+
+<div class="post">
+<p>Several variables are injected to Groovy Server Pages (GSP) in a Grails application. Two of them are the <code>ApplicationContext</code> and <code>GrailsApplication</code> objects. They are bound to the variables <em>applicationContext</em> and <em>grailsApplication</em>.</p><p>When we have access to the <code>ApplicationContext</code> we could for example load resources or get references to beans in the context. Via the <em>grailsApplication</em> variable we have access to for example the configuration values and metadata of the application.</p><pre class="brush:html">&lt;%-- File: grails-app/views/view/index.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;GSP Sample&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;ApplicationContext&lt;/h1&gt;
+
+        &lt;dl&gt;
+            &lt;dt&gt;applicationContext&lt;/dt&gt;
+            &lt;dd&gt;${applicationContext}&lt;/dd&gt;
+            &lt;dt&gt;# beans&lt;/dt&gt;
+            &lt;dd&gt;${applicationContext.beanDefinitionCount}&lt;/dd&gt;
+            &lt;dt&gt;beans&lt;/dt&gt;
+            &lt;dd&gt;${applicationContext.beanDefinitionNames.join(', ')}&lt;/dd&gt;
+        &lt;/dl&gt;
+
+        &lt;h1&gt;GrailsApplication&lt;/h1&gt;
+
+        &lt;dl&gt;
+            &lt;dt&gt;grailsApplication&lt;/dt&gt;
+            &lt;dd&gt;${grailsApplication}&lt;/dd&gt;
+            &lt;dt&gt;configuration&lt;/dt&gt;
+            &lt;dd&gt;${grailsApplication.config}&lt;/dd&gt;
+            &lt;dt&gt;metadata&lt;/dt&gt;
+            &lt;dd&gt;${grailsApplication.metadata}&lt;/dd&gt;
+        &lt;/dl&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre><p>When we open this GSP in our browser we get the following output:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-z_dQfpy7f9M/Ts9PrDBV6wI/AAAAAAAAFDE/_atThVFgKv8/s1600/http___localhost_8080_gspvars_view_index.jpg" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="249" width="320" src="http://3.bp.blogspot.com/-z_dQfpy7f9M/Ts9PrDBV6wI/AAAAAAAAFDE/_atThVFgKv8/s320/http___localhost_8080_gspvars_view_index.jpg" /></a></div><br /
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

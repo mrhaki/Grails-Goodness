@@ -1,0 +1,135 @@
+<html>
+<head>
+
+<title>Grails Goodness: Date Request Parameter Value Conversions</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Date Request Parameter Value Conversions</h3>
+
+<div class="post">
+<p>Grails has great support for <a href="http://mrhaki.blogspot.com/2010/02/grails-goodness-type-conversion-on.html">type conversion on request parameters</a>. And since Grails 2.0 the support has been extended to include dates. In our controller we can use the <code>date()</code> method on the <code>params</code> object to get a date value. The value of a request parameter is a String, so the String value is parsed to a Date object.</p><p>The default expected date format is <em>yyyy-MM-dd HH:mm:ss.S</em>. If we don't specify a specific date format in the <code>date()</code> method then this format is used. Or we can add a format to our <code>messages.properties</code> with the key <em>date.&lt;param-name&gt;.format</em>. Grails will first try the default format, but if the request parameter cannot be parsed to a valid Date object then Grails will do a lookup of the date format in <code>messages.properties</code>. Technically Grails uses the MessageSource bean to get the format, so we even can define the format per language or country.</p><p>Alternatively we can pass a date format or multiple date formats to the <code>date()</code> method. Grails will use these date formats to parse the request parameter into a valid Date object.</p><p>Let's show the different options we have in a simple sample controller:</p><pre class="brush:groovy">// File: grails-app/controllers/param/date/SampleController.groovy
+package param.date
+
+class SampleController {
+
+    final def dateFormats = ['yyyy-MM-dd', 'yyyyMMdd']
+
+    def index() {
+        [
+                defaultFormatDate: defaultFormatDate,
+                defaultFormatNameDate: defaultFormatNameDate,
+                singleFormatDate: singleFormatDate,
+                multipleFormatsDate1: multipleFormatsDate1,
+                multipleFormatsDate2: multipleFormatsDate2
+        ]
+    }
+
+    private Date getDefaultFormatDate() {
+        // Use default format yyyy-MM-dd HH:mm:ss.S
+        params.date 'defaultFormatDate'
+    }
+
+    private Date getDefaultFormatNameDate() {
+        // Lookup format with key date.defaultFormatNameDate.format
+        // in messages.properties: yyyy-MM-dd
+        params.date 'defaultFormatNameDate'
+    }
+
+    private Date getSingleFormatDate() {
+        params.date 'singleFormatDate', 'yyyyMMdd'
+    }
+
+    private Date getMultipleFormatsDate1() {
+        params.date 'multipleFormatsDate1', dateFormats
+    }
+
+    private Date getMultipleFormatsDate2() {
+        params.date 'multipleFormatsDate2', dateFormats
+    }
+
+}
+</pre><p>In <code>messages.properties</code> we define the format for the request parameter <em>defaultFormatNameDate</em>:</p><pre class="brush:plain"># File: grails-app/i18n/messages.properties
+...
+date.defaultFormatNameDate.format=yyyy-MM-dd
+...
+</pre><p>To show that the date parsing works we write a little integration test. We need this to be an integration test, because then the lookup of the key via the MessageSource bean works.</p><pre class="brush:groovy">package param.date
+
+import org.junit.Test
+
+class SampleControllerTests extends GroovyTestCase {
+
+    @Test
+    void testDateParameters() {
+        def controller = new SampleController()
+
+        // Set request parameters.
+        def params = [
+                defaultFormatDate: inputDateTime.format('yyyy-MM-dd HH:mm:ss.S'),
+                defaultFormatNameDate: inputDateTime.format('yyyy-MM-dd'),
+                singleFormatDate: inputDateTime.format('yyyyMMdd'),
+                multipleFormatsDate1: inputDateTime.format('yyyy-MM-dd'),
+                multipleFormatsDate2: inputDateTime.format('yyyyMMdd')
+        ]
+        controller.request.parameters = params
+
+        def model = controller.index()
+
+        assertDates inputDateTime, model.defaultFormatDate
+        assertDates inputDate, model.defaultFormatNameDate
+        assertDates inputDate, model.singleFormatDate
+        assertDates inputDate, model.multipleFormatsDate1
+        assertDates inputDate, model.multipleFormatsDate2
+    }
+
+    private void assertDates(final Date expected, final Date controllerDate) {
+        assertEquals expected.toGMTString(), controllerDate.toGMTString()
+    }
+
+    /**
+     * Create Date object for January 10, 2012 14:12:01.120
+     */
+    private Date getInputDateTime() {
+        final Calendar cal = Calendar.instance
+        cal.updated(year: 2012, month: Calendar.JANUARY, date: 10, 
+                    hours: 14, minutes: 12, seconds: 1, milliSeconds: 120)
+        cal.time
+    }
+
+    private Date getInputDate() {
+        final Date inputDateTime = inputDateTime
+        inputDateTime.clearTime()
+        inputDateTime
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

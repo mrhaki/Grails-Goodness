@@ -1,0 +1,112 @@
+<html>
+<head>
+
+<title>Grails Goodness: One WAR to Rule Them All (Part 1)</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: One WAR to Rule Them All (Part 1)</h3>
+
+<div class="post">
+<p>If we work on a Grails project and we want to deploy our application as Web Application Archive (WAR) it is easy to create the file. To create a WAR file of our Grails application we simply invoke the command: <code>$ grails war</code>. Suppose we want to put our WAR file first on a system test application server, then a user acceptance test application server and finally the production server. We want this WAR file to be self contained and all code and configuration must be in the WAR file. We don't want to generate a WAR file for each environment separately, but a single WAR must be passed through the different environments. In this post we see how we can do this.</p>
+<p>Suppose we have a Grails application and we define a <em>systemTest</em> and <em>userAcceptanceTest</em> environment next to the default <em>development</em>, <em>test</em> and <em>production</em> environments. We add these new environments to the environments block in <code>grails-app/conf/Config.groovy</code> and set a simple property <em>runningMode</em> with a different value for each environment.</p>
+<pre class="brush:groovy">
+// File: grails-app/conf/Config.groovy
+
+...
+
+environments {
+    production {
+        runningMode = 'LIVE'
+    }
+    development {
+        runningMode = 'DEV'
+    }
+    test {
+        runningMode = 'INTEGRATION TEST'
+    }
+    systemTest {
+        runningMode = 'SYSTEM TEST'
+    }
+    userAcceptanceTest {
+        runningMode = 'USER ACCEPTANCE TEST'
+    }
+}
+
+...
+
+</pre>
+<p>Next we are going to change our <code>grails-app/views/index.gsp</code> and add a little code to show the value of the property <em>runningMode</em>. This way we can show which environment is used by the running WAR.</p>
+<pre class="brush:html;highlight:[6]">
+&lt;%-- File: grails-app/views/index.gsp --%&gt;
+
+...
+
+&lt;h1&gt;Application Status&lt;/h1&gt;
+&lt;ul&gt;
+    &lt;li&gt;Running mode: ${grailsApplication.config.runningMode}&lt;/li&gt;
+    &lt;li&gt;App version: &lt;g:meta name="app.version"&gt;&lt;/g:meta&gt;&lt;/li&gt;
+    &lt;li&gt;Grails version: &lt;g:meta name="app.grails.version"&gt;&lt;/g:meta&gt;&lt;/li&gt;
+    &lt;li&gt;Groovy version: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}&lt;/li&gt;
+    &lt;li&gt;JVM version: ${System.getProperty('java.version')}&lt;/li&gt;
+    &lt;li&gt;Controllers: ${grailsApplication.controllerClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Domains: ${grailsApplication.domainClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Services: ${grailsApplication.serviceClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Tag Libraries: ${grailsApplication.tagLibClasses.size()}&lt;/li&gt;
+&lt;/ul&gt;
+
+...
+</pre>
+<p>Let's package the application in a WAR file:</p>
+<pre class="brush:plain;light:true">
+$ grails war
+</pre>
+<p>Next we can deploy the WAR file to our application servers. But how can we set the environment for our application, so we can see the right value of our configuration property <em>runningMode</em>? Answer: We need to set the system property <code>grails.env</code> with the correct value before we start the application server. The Grails application determines in which environment the application is running by looking at the system property <em>grails.env</em>.</p>
+<p>Suppose we use Tomcat as our servlet container for the Grails application. We defined separate Tomcat instances for each environment (system test, user acceptance test and production). Before we start an instance we can use the environment variable <code>CATALINA_OPTS</code> to set the system property <code>grails.env</code>. For example for the system test Tomcat intance we define <code>CATALINA_OPTS</code> as:</p>
+<pre class="brush:plain;light:true">
+$ export CATALINA_OPTS=-Dgrails.env=systemTest
+</pre>
+<p>After we have defined the correct value we can install our single WAR file to the three Tomcat instances and start them. If we then open the index page of our application we can see in the left column the value or our configuration property <em>runningMode</em>:</p>
+<div class="separator" style="clear: both; text-align: center;">
+
+<a href="http://4.bp.blogspot.com/_-vJw6r2W-bw/TUuUD9V7kKI/AAAAAAAAEaQ/zZQelYV9ohE/s1600/grails-st.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="155" width="193" src="http://4.bp.blogspot.com/_-vJw6r2W-bw/TUuUD9V7kKI/AAAAAAAAEaQ/zZQelYV9ohE/s320/grails-st.png" /></a></div>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUuUEEof4tI/AAAAAAAAEaY/MOH512_leSg/s1600/grails-uat.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="167" width="154" src="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUuUEEof4tI/AAAAAAAAEaY/MOH512_leSg/s320/grails-uat.png" /></a></div>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://3.bp.blogspot.com/_-vJw6r2W-bw/TUuUEVBwwCI/AAAAAAAAEag/5SK0CeR3l_M/s1600/grails-prod.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="153" width="155" src="http://3.bp.blogspot.com/_-vJw6r2W-bw/TUuUEVBwwCI/AAAAAAAAEag/5SK0CeR3l_M/s320/grails-prod.png" /></a></div>
+
+<p>And we see the different values for the different servers. So it is very easy to create a single WAR file, but with different configuration settings for different environments, because of the environments support in Grails. We only have to tell the application server via system property <code>grails.env</code> which environment settings need to be used.</p>
+
+<p>In the <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-one-war-to-rule-them_04.html">following post</a> we learn how we can use configuration files outside of the application code. Per environment we can set a configuration property in separate files.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

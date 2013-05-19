@@ -1,0 +1,71 @@
+<html>
+<head>
+
+<title>Grails Goodness: Passing Objects to Attributes of Tags in Unit Tests</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Passing Objects to Attributes of Tags in Unit Tests</h3>
+
+<div class="post">
+<p>Unit testing tag libraries in Grails is easy. We can use the <code>applyTemplate()</code> method to execute a tag and check the output. We pass the HTML string representing the tag to <code>applyTemplate()</code> as we would use it in a GSP. Attribute values of a tag can be String values, but also any other type. To pass other types in our test as attribute values we must add an extra argument to <code>applyTemplate()</code>. The argument is a <code>Map</code> with model values which are used to pass as value to the tag library attributes.</p><p>Let's see this in action with an example. First we create a tag library with a tag that will show the value of the title property of a <code>Book</code> instance. The <code>Book</code> instance is passed to the tag as attribute value for the attribute <code>book</code>:</p><pre class="brush:groovy">package com.mrhaki.grails
+
+class BookTagLib {
+
+    static namespace = 'book'
+
+    def title = { attributes, body ->
+        final Book book = attributes.get('book')
+        final String bookTitle = book.title
+        out &lt;&lt; bookTitle
+    }
+
+}
+</pre><p>We can test this tag with the following Spock specification. Notice we use the <code>applyTemplate()</code> method and pass an instance of <code>Book</code> using a <code>Map</code> as the second argument:</p><pre class="brush:groovy">package com.mrhaki.grails
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(BookTagLib)
+class BookTagLibSpecification extends Specification {
+
+    def "show book title for given Book instance"() {
+        given:
+        final Book book = new Book(title: 'Gradle Effective Implementation Guide')
+
+        expect:
+        applyTemplate('&lt;book:title book="${bookInstance}"/&gt;', [bookInstance: book]) == 'Gradle Effective Implementation Guide'
+    }
+
+}
+</pre><p>Code written with Grails 2.2.2 and Spock 0.7-groovy-2.0.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

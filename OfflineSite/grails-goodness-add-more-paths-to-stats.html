@@ -1,0 +1,79 @@
+<html>
+<head>
+
+<title>Grails Goodness: Add More Paths to the Stats Report</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Add More Paths to the Stats Report</h3>
+
+<div class="post">
+<p>If we invoke <code>$ grails stats</code> for our Grails project we get to see the number of files and lines of code (LOC) for several Grails artifacts. For example we can see how many controllers, services and taglibs are in our project and how many lines of code is written for each.</p>
+<pre class="brush:plain;light:true">
+    +----------------------+-------+-------+
+    | Name                 | Files |  LOC  |
+    +----------------------+-------+-------+
+    | Controllers          |     1 |    89 | 
+    | Domain Classes       |     1 |     5 | 
+    | Jobs                 |     1 |     6 | 
+    | Unit Tests           |     3 |    36 | 
+    | Scripts              |     1 |     4 | 
+    +----------------------+-------+-------+
+    | Totals               |     7 |   140 | 
+    +----------------------+-------+-------+
+</pre>
+<p>We can add new source directories to the report. When the stats report is generated the <em>StatsStart</em> event is triggered. The default list of paths is passed as the argument of the event. We can <a href="http://grails.org/doc/latest/guide/single.html#4.3%20Hooking%20into%20Events">subscribe to this event</a> in our own Grails application. Because we get the list of paths as an argument, we can define our own path info and add it to the list. We add the paths <code>grails-app/conf</code> and <code>grails-app/utils</code> to be included in the stats report.</p>
+<pre class="brush:groovy">
+// File: scripts/_Events.groovy
+eventStatsStart = { pathInfo ->
+    def confPathInfo = [name: "Configuration Files", path: "^grails-app.conf", filetype: [".groovy"]]
+    def utilPathInfo = [name: "Utils", path: "^grails-app.utils", filetype: [".groovy"]]
+    pathInfo << confPathInfo << utilPathInfo
+}
+</pre>
+<p>Now we can run the <code>stats</code> command again and we see the new paths in our report:</p>
+<pre class="brush:plain;light:true;highlight:[8,9]">
+    +----------------------+-------+-------+
+    | Name                 | Files |  LOC  |
+    +----------------------+-------+-------+
+    | Controllers          |     1 |    89 | 
+    | Domain Classes       |     1 |     5 | 
+    | Jobs                 |     1 |     6 | 
+    | Unit Tests           |     3 |    36 | 
+    | Scripts              |     1 |     5 | 
+    | Configuration Files  |     7 |    87 | 
+    | Utils                |     1 |     5 | 
+    +----------------------+-------+-------+
+    | Totals               |    15 |   233 | 
+    +----------------------+-------+-------+
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

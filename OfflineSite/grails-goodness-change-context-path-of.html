@@ -1,0 +1,50 @@
+<html>
+<head>
+
+<title>Grails Goodness: Change Context Path of a Grails Application for Jetty</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Change Context Path of a Grails Application for Jetty</h3>
+
+<div class="post">
+<p>By default a Grails application context path is set to the application name. The context path is the <b>bold</b> part in the following URL: <em>http://localhost:8888<b>/appname</b>/index</em>. We can change the context path with properties for when we use <code>$ grails run-app</code> to run the application. We can run <code>$ grails -Dapp.context=/app run-app</code> to change the context path to <em>/app</em>. Or we can set the property <code>app.context = /app</code> in <code>application.properties</code>. Or we can add <code>grails.app.context = '/app'</code> to our <code>conf/Config.groovy</code> configuration file. These properties will all affect the context path when we run <code>$ grails run-app</code>.</p>
+<p>But what if we want to deploy our application to Jetty on a production server and use a custom context path? We have to add an extra file to <code>web-app/WEB-INF</code> with the name <code>jetty-web.xml</code>. Here we can configure Jetty specific settings for the application and one of the settings is the context path. If the application is deployed to Jetty or we run the application with <code>$ grails run-app</code> the context path is used that we set in <code>jetty-web.xml</code>.</p>
+<pre class="brush:xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!-- File: web-app/WEB-INF/jetty-web.xml --&gt;
+&lt;!DOCTYPE Configure PUBLIC &quot;-//Mort Bay Consulting//DTD Configure//EN&quot; &quot;http://jetty.mortbay.org/configure.dtd&quot;&gt;
+&lt;Configure class=&quot;org.mortbay.jetty.webapp.WebAppContext&quot;&gt;
+    &lt;Set name=&quot;contextPath&quot;&gt;/app&lt;/Set&gt;
+&lt;/Configure&gt;
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

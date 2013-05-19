@@ -1,0 +1,59 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using MetaClass with Testing</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using MetaClass with Testing</h3>
+
+<div class="post">
+<p>We can use the <code>metaClass</code> property of classes to define behavior we want to use in our tests. But if we do, the change is not only for the duration of a test method, but for the entire test run. This is because we make a change at class level and other tests that use the class will get the new added behavior. To limit our change to a test method we first use the <code>registerMetaClass()</code> method. Grails will remove our added behavior automatically after the test method is finished.</p>
+<p>Let's see this with an example. We have a domain class <code>User</code> which uses the Searchable plugin. This plugin will add a <code>search()</code> and we want to use in our test case.</p>
+<pre class="brush:groovy">
+class User {
+    static searchable = true
+    String username
+}
+
+class UserTests extends GrailsUnitTestCase {
+    void testSearch() {
+        registerMetaClass User
+        User.metaClass.static.search = { searchText -&gt;
+            [results: [new User(username:'mrhaki')],
+             total: 1, offset: 0, scores: [1]] 
+        }
+        assertEquals 'mrhaki', User.search('mrhaki').results[0].username
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

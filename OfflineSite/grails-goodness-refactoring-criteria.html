@@ -1,0 +1,62 @@
+<html>
+<head>
+
+<title>Grails Goodness: Refactoring Criteria Contents</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Refactoring Criteria Contents</h3>
+
+<div class="post">
+<p>Grails adds a Hibernate criteria builder DSL so we can create criteria's using a builder syntax. When we have criteria with a lot of restrictions or conditional code inside the builder we can refactor this easily. We look at a simple criteria to show this principle, but it can be applied to more complex criteria's.</p>
+<pre class="brush:groovy">
+// Original criteria builder.
+def list = Domain.withCriteria {
+    ilike 'title', 'Groovy%'
+    le 'postedDate', new Date()
+}
+
+// Refactor
+def list2 = Domain.withCriteria {
+    title delegate, 'Groovy%'
+    alreadyPosted delegate
+}
+
+private void title(builder, String query) {
+    builder.ilike 'title', query
+}
+
+private void alreadyPosted(builder) {
+    builder.le 'postedDate', new Date()
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

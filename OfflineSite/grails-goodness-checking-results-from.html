@@ -1,0 +1,125 @@
+<html>
+<head>
+
+<title>Grails Goodness: Checking Results from Forward Action in Controller Unit Tests</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Checking Results from Forward Action in Controller Unit Tests</h3>
+
+<div class="post">
+<p>In Grails we can write unit tests for controllers. We can check for example the results from a <code>redirect()</code> or <code>render()</code> method. To check the result from a <code>forward()</code> action we can use the <code>forwardedUrl</code> property of the mock response object. The format of the URL is very basic and has the following form: <code>/grails/(controller)/(action).dispatch?(queryParameters)</code>. So we get the servlet representation of a Grails controller request. We can use this format to check if our <code>forward()</code> method is correct in the unit test.</p><p>First we create a simple controller with a <code>index()</code> action which invokes the <code>forward()</code> method with a action and parameters:</p><pre class="brush:groovy">package com.mrhaki.grails
+
+class BookController {
+
+    def index() {
+        forward action: 'show', params: [fromIndex: true, bookId: 200]
+    }
+
+}
+</pre><p>Now we write a test (with Spock of course) to check the values from the <code>forward()</code> method in the mock response. The following specification contains code to parse the <code>forwardedUrl</code> property. We get the /controller/action as <code>String</code> and the parameters as <code>Map</code> object. Using Groovy syntax we can check for the values with <code>forwardedUrl</code> and <code>forwardedParams</code>:</p><pre class="brush:groovy">
+package com.mrhaki.grails
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(BookController)
+class BookControllerSpecification extends Specification {
+
+    def "index must forward to show action"() {
+        when:
+        controller.index()
+
+        then:
+        forwardedUrl == '/book/show'
+    }
+
+    def "index must set parameter fromIndex to value true and forward"() {
+        when:
+        controller.index()
+
+        then:
+        forwardedParams.fromIndex == 'true'
+    }
+
+    def "index must set parameter bookId to 200 and forward"() {
+        when:
+        controller.index()
+
+        then:
+        forwardedParams.bookId == '200'
+    }
+
+    private getForwardedParams() {
+        parseResponseForwardedUrl()[1]
+    }
+
+    private String getForwardedUrl() {
+        parseResponseForwardedUrl()[0]
+    }
+
+    private parseResponseForwardedUrl() {
+        // Pattern for forwardedUrl stored in response.
+        def forwardedUrlPattern = ~/\/grails\/(.*)?\.dispatch\?*(.*)/
+
+        // Match forwardedUrl in response with pattern.
+        def matcher = response.forwardedUrl =~ forwardedUrlPattern
+
+        def forwardUrl = null
+        def forwardParameters = [:]
+
+        if (matcher) {
+            // Url is first group in pattern. We add '/' so it has the same format as redirectedUrl from response.
+            forwardUrl = "/${matcher[0][1]}"
+
+            // Parse parameters that are available in the forwardedUrl of the response.
+            forwardParameters = parseResponseForwardedParams(matcher[0][2])
+        }
+
+        [forwardUrl, forwardParameters]
+    }
+
+    private parseResponseForwardedParams(final String queryString) {
+        // Query string has format paramName=paramValue&param2Name=param2Value. & is optional.
+        def parameters = queryString.split('&')
+
+        // Turn the paramName=paramValue parts into a Map.
+        def forwardParameters = parameters.inject([:]) { result, parameter ->
+            def (parameterName, parameterValue) = parameter.split('=')
+            result[parameterName] = parameterValue
+            result
+        }
+        forwardParameters
+    }
+}
+</pre><p>Code written with Grails 2.2.2 and Spock 0.7-groovy-2.0</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

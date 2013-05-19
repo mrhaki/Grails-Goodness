@@ -1,0 +1,99 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Spring Bean Aliases</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Spring Bean Aliases</h3>
+
+<div class="post">
+<p>Grails uses dependency injection by convention. This means if we have a property <code>messageService</code> then a Spring bean or Grails service  with the name <code>messageService</code> is injected. Grails will automatically use the name of a Grails service as the name of the Spring bean definition (applying Java Bean conventions and start with a lowercase). So if we have a Grails service <code>MessageService</code> the resulting Spring bean definition will have the name <code>messageService</code>. Any Spring bean that wants to use the service only has to create the property <code>messageService</code> and dependency injection by convention makes sure the Grails service is injected.</p><p>We can change the Spring bean definition name using Spring bean aliases. With an alias we provide an extra name for a Spring bean. In our Grails application we can add an alias in the <code>grails-app/conf/spring/resources.groovy</code> file. In the following sample we add the alias <code>message</code> for the <code>MessageService</code> Grails service:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+beans = {
+    springConfig.addAlias 'message', 'messageService'
+}
+</pre><p>We can use aliases to provide different service implementations and conditionally (for example based on environment) activate an implementation. The class that wants to use the service only has to use the dependency injection by convention and define a property with a name. In the <code>resources.groovy</code> file we can then set the alias with the correct name to the implementation we need.</p><p>Let's see how this works with an example. Suppose we have a controller that depends on a service with the name <code>messageService</code>. We use an interface to define the type of the service in our sample, but that is not necessary, we could do the same thing without interfaces:</p><pre class="brush:groovy">//File: grails-app/controllers/com/mrhaki/grails/spring/MessageController.groovy
+package com.mrhaki.grails.spring
+
+class MessageController {
+
+    MessageService messageService
+
+    def index() {
+        render messageService.message
+    }
+}
+</pre><p>Let's create the interface, which is very simple in our sample:</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/grails/spring/MessageService.groovy
+package com.mrhaki.grails.spring
+
+interface MessageService {
+
+    String getMessage()
+
+}
+</pre><p>Next we create two Grails services that implement the <code>MessageService</code> interface: <code>MessageRemoteService</code> and <code>MessageLocalService</code>:</p><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/grails/spring/MessageRemoteService.groovy
+package com.mrhaki.grails.spring
+
+class MessageRemoteService implements MessageService {
+
+    String getMessage() {
+        'Remote message'
+    }
+
+}
+</pre><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/grails/spring/MessageLocalService.groovy
+package com.mrhaki.grails.spring
+
+class MessageLocalService implements MessageService {
+
+    String getMessage() {
+        'Local message'
+    }
+
+}
+</pre><p>If we run the Grails application we don't have a Spring bean definition with the name <code>messageService</code>, but we do have two bean definitions with the names <code>messageRemoteService</code> and <code>messageLocalService</code>. To make sure the <code>MessageController</code> will have the correct service injected we need to add aliases to <code>resources.groovy</code>. By default we want to use the <code>messageRemoteService</code> as <code>messageService</code>, but during development we want to use <code>messageLocalService</code>:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import grails.util.Environment
+
+beans = {
+    // Default we use the messageRemoteService as implementation of MessageService
+    springConfig.addAlias 'messageService', 'messageRemoteService'
+
+    Environment.executeForCurrentEnvironment {
+        development {
+            // In development we use messageLocalService as implementation
+            // of MessageService.
+            springConfig.addAlias 'messageService', 'messageLocalService'
+        }
+    }
+}
+</pre><p>So with aliases it is easy to swap service implementations, based on some condition. This can be very useful if we have a service and want to use a mocked or simplified version during development and test for example. This post is based on the presentation <a href="http://www.slideshare.net/gr8conf/under-the-hood-using-spring-in-grails"><em>Under the hood: Using Spring in Grails</em></a> and <a href="http://burtbeckwith.com/blog/?p=85">blog post</a> by Burt Beckwith</p><p>Code written with Grails 2.2.1</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

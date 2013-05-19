@@ -1,0 +1,53 @@
+<html>
+<head>
+
+<title>Grails Goodness: Use a Different jQuery UI Theme with Resources Plugin</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Use a Different jQuery UI Theme with Resources Plugin</h3>
+
+<div class="post">
+<p>The <a href="http://grails-plugins.github.com/grails-resources/">resources plugin</a> is a great way to manage resources in our Grails application. We define our resources like Javascript and CSS files with a simple DSL. The plugin will package the resources in the most efficient way for us in the final application.</p><p>The <a href="http://www.jqueryui.com">jQuery UI</a> library has support for theming. We can use the default theme(s), but we can also create our own custom theme with for example the <a href="http://jqueryui.com/themeroller/">jQuery UI ThemeRoller</a> site. </p><p>If we use the <a href="http://www.grails.org/plugin/jquery-ui">jQuery UI plugin</a> and want to use a different than the default theme we must change our configuration for the resources plugin. We override the theme that is set by default and point it to our new custom theme. We can change <code>grails-app/conf/Config.groovy</code> or a separate resources artifact file. We add an <em>overrides</em> section and use the same <em>id</em> attribute value as set by the jQuery UI plugin. The <em>url</em> attribute points to the location of the custom jQuery UI ThemeRoller CSS file.</p><pre class="brush:groovy;highlight:[5,6,7,8,9,10]">// File: grails-app/conf/Config.groovy
+grails.resources.modules = {
+    core {
+        dependsOn 'jquery-ui'
+    }
+    // Define reference to custom jQuery UI theme
+    overrides {
+        'jquery-theme' {
+            resource id: 'theme', url: '/css/custom-theme/jquery-ui.custom.css'
+        }
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

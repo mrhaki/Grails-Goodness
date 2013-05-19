@@ -1,0 +1,78 @@
+<html>
+<head>
+
+<title>Grails Goodness: The Template Namespace</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: The Template Namespace</h3>
+
+<div class="post">
+<p>To have clean and re-usable Groovy Server Pages (GSP) we can use <a href="http://grails.org/doc/latest/guide/single.html#6.2.3%20Views%20and%20Templates">templates</a> on our pages. A template contains HTML and code that we can maintain separately. In this post we learn about the template namespace to include a template on our page.</p>
+<p>Suppose we have a page in our application that display a list of products. Each product has several properties we show. The template for a product is:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/product/_productView.gsp --%&gt;
+&lt;li class="${cssClassName}"&gt;
+    ${product.identifier}
+    ${product.name}
+    &lt;g:formatNumber number="${product.price}" type="currency" currencyCode="EUR"/&gt;
+&lt;/li&gt;
+</pre>
+<p>We can use the template with the <code>g:render</code> tag and <code>template</code> attribute on our page:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/product/list.gsp --%&gt;
+...
+&lt;ul&gt;
+    &lt;g:render template="productView" 
+              var="product" collection="${products}" 
+              model="[cssClassName: 'info']"/&gt;
+&lt;/ul&gt;
+...
+&lt;ul&gt;
+    &lt;g:each in="${products}" var="product"&gt;
+        &lt;g:render template="productView" model="[product: product, cssClassName: 'info']"/&gt;
+    &lt;/g:each&gt;
+&lt;/ul&gt;
+...
+</pre>
+<p><strong>But</strong> we can also use the template namespace feature in Grails. We define a tag with the namespace <code>tmpl</code> and the tagname is our template name. We pass the model for the template through the attributes. Each attribute name/value pair is passed as model to the template.</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/product/list.gsp --%&gt;
+...
+&lt;ul&gt;
+    &lt;g:each in="${products}" var="product"&gt;
+        &lt;tmpl:productView product="${product}" cssClassName="info"/&gt;
+    &lt;/g:each&gt;
+&lt;/ul&gt;
+...
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

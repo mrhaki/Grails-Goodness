@@ -1,0 +1,63 @@
+<html>
+<head>
+
+<title>Grails Goodness: Use TimeAndSizeRollingAppender for Logging</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Use TimeAndSizeRollingAppender for Logging</h3>
+
+<div class="post">
+<p>In <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-use-log4j-extras.html">a previous post</a> we learned how to use the Log4j Extras Companion RollingFileAppender. In this post we learn how to use <a href="http://www.simonsite.org.uk/">TimeAndSizeRollingAppender</a>. This appender has a lot of nice features among rolling over the log file at a time interval <strong>and</strong> we can limit the number of rolled over log files. With this combination we can keep a history of log files, but limit how many log files are saved.</p>
+<p>First we must <a href="http://www.simonsite.org.uk/download.htm">download</a> the JAR file with the appender and save it in the <code>lib</code> directory of our Grails application. Next we can configure the appender in <code>grails-app/conf/Conf.groovy</code>:</p>
+<pre class="brush:groovy">
+// File: grails-app/conf/Config.groovy
+import org.apache.log4j.appender.TimeAndSizeRollingAppender
+...
+log4j = {
+    appenders {
+        appender new TimeAndSizeRollingAppender(name: 'timeAndSizeRollingAppender',
+                     file: 'logs/app.log', datePattern: '.yyyy-MM-dd',
+                     maxRollFileCount: 7, compressionAlgorithm: 'GZ',
+                     compressionMinQueueSize: 2,
+                     layout: pattern(conversionPattern: "%d [%t] %-5p %c{2} %x - %m%n"))
+    }
+
+    root {
+        // Use the appender.
+        debug 'timeAndSizeRollingAppender'
+    }
+}
+...
+</pre>
+<p>We configured the appender to rollover daily, compress the contents of the archived log files after 2 rollovers, and only save 7 archived log files.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

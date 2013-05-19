@@ -1,0 +1,154 @@
+<html>
+<head>
+
+<title>Groovy Goodness</title>
+
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="Stylesheet" href="styles/shBlackWhite.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body class="toc">
+
+<div class="titlewrapper">
+	<h1 class="title">Groovy Goodness</h1>
+	<h2 class="description">assert 'mrhaki' == ['Hubert','Alexander','Klein','Ikkink'].inject('mr') { c,n -&gt; c += n[0].toLowerCase() }</h2>
+</div>
+
+<div class="toc">
+    <ul>
+	
+	    <li><a href="grails-goodness-checking-results-from.html">Grails Goodness: Checking Results from Forward Action in Controller Unit Tests</a></li>
+	
+	    <li><a href="grails-goodness-passing-objects-to.html">Grails Goodness: Passing Objects to Attributes of Tags in Unit Tests</a></li>
+	
+	    <li><a href="grails-goodness-testing-views-and.html">Grails Goodness: Testing Views and Templates</a></li>
+	
+	    <li><a href="grails-goodness-using-wrapper-for.html">Grails Goodness: Using Wrapper for Running Grails Commands Without Grails Installation</a></li>
+	
+	    <li><a href="grails-goodness-set-property-values-of.html">Grails Goodness: Set Property Values of Spring Beans in resources.groovy</a></li>
+	
+	    <li><a href="grails-goodness-dont-invalidate-session.html">Grails Goodness: Don't Invalidate Session After Logout with Spring Security Plugin</a></li>
+	
+	    <li><a href="grails-goodness-use-constructor.html">Grails Goodness: Use Constructor Argument Based Dependency Injection with resources.groovy</a></li>
+	
+	    <li><a href="grails-goodness-using-spring-bean.html">Grails Goodness: Using Spring Bean Aliases</a></li>
+	
+	    <li><a href="grails-goodness-conditionally-load-bean.html">Grails Goodness: Conditionally Load Bean Definitions from resources.groovy</a></li>
+	
+	    <li><a href="grails-goodness-injecting-grails.html">Grails Goodness: Injecting Grails Services into Spring Beans</a></li>
+	
+	    <li><a href="grails-goodness-script-name.html">Grails Goodness: Script Name Abbreviation</a></li>
+	
+	    <li><a href="grails-goodness-shortcut-to-open-test.html">Grails Goodness: Shortcut to Open Test Reports in Interactive Console</a></li>
+	
+	    <li><a href="grails-goodness-render-gsp-views-and.html">Grails Goodness: Render GSP Views And Templates Outside Controllers</a></li>
+	
+	    <li><a href="grails-goodness-binding-method.html">Grails Goodness: Binding Method Arguments in Controller Methods</a></li>
+	
+	    <li><a href="grails-goodness-generate-links-outside.html">Grails Goodness: Generate Links Outside Controllers or Tag Libraries</a></li>
+	
+	    <li><a href="grails-goodness-date-request-parameter.html">Grails Goodness: Date Request Parameter Value Conversions</a></li>
+	
+	    <li><a href="grails-goodness-customize-url-format.html">Grails Goodness: Customize the URL Format</a></li>
+	
+	    <li><a href="grails-goodness-get-grailsapplication.html">Grails Goodness: Get GrailsApplication and ApplicationContext in GSP</a></li>
+	
+	    <li><a href="grails-goodness-access-action-and.html">Grails Goodness: Access Action and Controller Name in GSP</a></li>
+	
+	    <li><a href="grails-goodness-internationalize.html">Grails Goodness: Internationalize Javascript Messages with JAWR Plugin</a></li>
+	
+	    <li><a href="grails-goodness-use-different-jquery-ui.html">Grails Goodness: Use a Different jQuery UI Theme with Resources Plugin</a></li>
+	
+	    <li><a href="grails-goodness-applying-layouts-in.html">Grails Goodness: Applying Layouts in Layouts Revisited</a></li>
+	
+	    <li><a href="grails-goodness-add-additional-web.html">Grails Goodness: Add Additional Web Application to Tomcat</a></li>
+	
+	    <li><a href="grails-goodness-applying-layouts-in.html">Grails Goodness: Applying Layouts in Layouts</a></li>
+	
+	    <li><a href="grails-goodness-splitting-i18n-message.html">Grails Goodness: Splitting i18n Message Bundles</a></li>
+	
+	    <li><a href="grails-goodness-access-configuration-in.html">Grails Goodness: Access Configuration in Grails Scripts</a></li>
+	
+	    <li><a href="grails-goodness-controller-properties.html">Grails Goodness: Controller Properties as Model</a></li>
+	
+	    <li><a href="grails-goodness-set-application-wide.html">Grails Goodness: Set Application Wide Default Layout</a></li>
+	
+	    <li><a href="grails-goodness-profile-script-tasks.html">Grails Goodness: Profile Script Tasks</a></li>
+	
+	    <li><a href="grails-goodness-encode-content-with.html">Grails Goodness: Encode Content with the encodeAs Tag</a></li>
+	
+	    <li><a href="grails-goodness-format-boolean-values.html">Grails Goodness: Format Boolean Values with the formatBoolean Tag</a></li>
+	
+	    <li><a href="grails-goodness-link-namespace.html">Grails Goodness: The Link Namespace</a></li>
+	
+	    <li><a href="grails-goodness-templates-can-have-body.html">Grails Goodness: Templates Can Have a Body</a></li>
+	
+	    <li><a href="grails-goodness-template-namespace.html">Grails Goodness: The Template Namespace</a></li>
+	
+	    <li><a href="grails-goodness-add-more-paths-to-stats.html">Grails Goodness: Add More Paths to the Stats Report</a></li>
+	
+	    <li><a href="grails-goodness-define-date-format-in.html">Grails Goodness: Define Date Format in i18n ResourceBundle</a></li>
+	
+	    <li><a href="grails-goodness-use-timeandsizerollinga.html">Grails Goodness: Use TimeAndSizeRollingAppender for Logging</a></li>
+	
+	    <li><a href="grails-goodness-use-log4j-extras.html">Grails Goodness: Use Log4j Extras Companion RollingFileAppender</a></li>
+	
+	    <li><a href="grails-goodness-one-war-to-rule-them_4229.html">Grails Goodness: One WAR to Rule Them All (Part 3)</a></li>
+	
+	    <li><a href="grails-goodness-one-war-to-rule-them_04.html">Grails Goodness: One WAR to Rule Them All (Part 2)</a></li>
+	
+	    <li><a href="grails-goodness-one-war-to-rule-them.html">Grails Goodness: One WAR to Rule Them All (Part 1)</a></li>
+	
+	    <li><a href="grails-goodness-rss-feeds-for-newest.html">Grails Goodness: RSS Feeds for Newest and Recently Updated Plugins</a></li>
+	
+	    <li><a href="grails-goodness-refactoring-criteria.html">Grails Goodness: Refactoring Criteria Contents</a></li>
+	
+	    <li><a href="grails-goodness-execute-code-for.html">Grails Goodness: Execute Code for Current Environment</a></li>
+	
+	    <li><a href="grails-goodness-using-codecs-in-test.html">Grails Goodness: Using Codecs in Test Classes</a></li>
+	
+	    <li><a href="grails-goodness-use-gsp-template-engine.html">Grails Goodness: Use the GSP Template Engine in a Controller</a></li>
+	
+	    <li><a href="grails-goodness-testing-for-chain.html">Grails Goodness: Testing for Chain Result in Controller</a></li>
+	
+	    <li><a href="grails-goodness-cleaning-before-running.html">Grails Goodness: Cleaning Before Running Tests</a></li>
+	
+	    <li><a href="grails-goodness-invoking-single-test.html">Grails Goodness: Invoking a Single Test Method</a></li>
+	
+	    <li><a href="grails-goodness-generate-ant-build.html">Grails Goodness: Generate ANT Build Script</a></li>
+	
+	    <li><a href="grails-goodness-see-test-output-on.html">Grails Goodness: See Test Output on the Command Line</a></li>
+	
+	    <li><a href="grails-goodness-using-metaclass-with.html">Grails Goodness: Using MetaClass with Testing</a></li>
+	
+	    <li><a href="grails-goodness-no-more-questions.html">Grails Goodness: No More Questions</a></li>
+	
+	    <li><a href="grails-goodness-get-values-from.html">Grails Goodness: Get Values from Parameters with Same Name</a></li>
+	
+	    <li><a href="grails-goodness-type-conversion-on.html">Grails Goodness: Type Conversion on Parameters</a></li>
+	
+	    <li><a href="grails-goodness-simple-script-to-create.html">Grails Goodness: Simple Script to Create WAR Files for Each Environment</a></li>
+	
+	    <li><a href="grails-goodness-multiple-environments.html">Grails Goodness: Multiple Environments</a></li>
+	
+	    <li><a href="grails-goodness-rerun-latest-failed.html">Grails Goodness: Rerun the Latest Failed Test</a></li>
+	
+	    <li><a href="grails-goodness-logging-service-method.html">Grails Goodness: Logging Service Method Calls with Dynamic Groovy</a></li>
+	
+	    <li><a href="grails-goodness-access-grails.html">Grails Goodness: Access Grails Application in BootStrap</a></li>
+	
+	    <li><a href="grails-goodness-cleaning-up-before-war.html">Grails Goodness: Cleaning Up Before WAR Creation</a></li>
+	
+	    <li><a href="grails-goodness-change-context-path-of.html">Grails Goodness: Change Context Path of a Grails Application for Jetty</a></li>
+	
+	    <li><a href="grails-goodness-add-dailyrollingfileapp.html">Grails Goodness: Add a DailyRollingFileAppender to Grails Logging</a></li>
+	
+	    <li><a href="grails-goodness-mocking-configuration.html">Grails Goodness: Mocking the Configuration in Unit Tests</a></li>
+	
+	</ul>
+</div>
+
+</body>
+</html>

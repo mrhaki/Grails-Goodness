@@ -1,0 +1,263 @@
+<html>
+<head>
+
+<title>Grails Goodness: Applying Layouts in Layouts</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Applying Layouts in Layouts</h3>
+
+<div class="post">
+<p>Grails uses <a href="http://www.opensymphony.com/sitemesh/">Sitemesh</a> to support view layouts. A layout contains common HTML content that is reused on several pages. For example we can create a web application with a common header and footer. The body of the HTML pages is different for the pages in the web application. But the body can also have a common layout for certain pages. For example some pages have a body with two columns, others have a single column. To reuse these layouts we can use the <code>&lt;g:applyLayout .../&gt;</code> tag. This means we can apply layouts in layouts, which provides a very flexible solution with optimal reuse of HTML content.</p>
+<p>Update: <a href="http://mrhaki.blogspot.com/2011/04/grails-goodness-applying-layouts-in.html">another way to apply layouts in layouts</a> based on the comments by Peter Ledbrook.</p>
+<p>Let's see how this works with a small sample application. All pages have a header with a logo, search form and main menu. Each page also has a footer with some copyright information. The homepage has a body with five blocks of information, we have product list page with a one column body and finally a product details view with a two column body.</p>
+<p>The following diagrams shows the structure of the pages:</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/-AwXwEHX5swk/TZTacLhzQRI/AAAAAAAAErE/FOx4OK7VAMg/s1600/grails-layout-demo-home.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="219" width="320" src="http://2.bp.blogspot.com/-AwXwEHX5swk/TZTacLhzQRI/AAAAAAAAErE/FOx4OK7VAMg/s320/grails-layout-demo-home.png" /></a></div>
+
+<p style="text-align:center;">Layout homepage</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://3.bp.blogspot.com/-ktqwoynlrkc/TZTacRO_RWI/AAAAAAAAErM/hQJ15sPdCfg/s1600/grails-layout-demo-productlist.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="221" width="320" src="http://3.bp.blogspot.com/-ktqwoynlrkc/TZTacRO_RWI/AAAAAAAAErM/hQJ15sPdCfg/s320/grails-layout-demo-productlist.png" /></a></div>
+
+<p style="text-align:center;">Layout product list</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/-YwVqOOSwyNU/TZTacj6ZGcI/AAAAAAAAErU/Ey8EVwpmZ-4/s1600/grails-layout-demo-productview.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="221" width="320" src="http://2.bp.blogspot.com/-YwVqOOSwyNU/TZTacj6ZGcI/AAAAAAAAErU/Ey8EVwpmZ-4/s320/grails-layout-demo-productview.png" /></a></div>
+
+<p style="text-align:center;">Layout product details</p>
+
+<p>First we create the main layout with the header and footer HTML content. The body content is variable for the pages, so we use <code>&lt;g:layoutBody/&gt;</code> in our main layout.</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/layout/page.gsp --%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;&lt;g:layoutTitle default="Grails"/&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="${resource(dir: 'css', file: 'main.css')}"/&gt;
+    &lt;link rel="stylesheet" href="${resource(dir: 'css', file: 'layout.css')}"/&gt;
+    &lt;link rel="stylesheet" href="${resource(dir: 'css', file: 'fonts.css')}"/&gt;
+    &lt;link rel="shortcut icon" href="${resource(dir: 'images', file: 'favicon.ico')}" type="image/x-icon"/&gt;
+    &lt;g:layoutHead/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="header" class="clearfix"&gt;
+    &lt;div id="logo"&gt;
+        &lt;g:link uri="/"&gt;&lt;g:message code="nav.home"/&gt;&lt;/g:link&gt;
+        &lt;p&gt;&lt;g:message code="title.website"/&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div id="searchform"&gt;
+        &lt;g:form controller="search"&gt;
+            &lt;fieldset class="search"&gt;
+                &lt;input type="text" class="search-input" value="${message(code:'search.box.search')}" name="search" id="search-phrase" maxlength="100"/&gt;
+                &lt;input type="submit" value="${message(code: 'search.box.submit')}" /&gt;
+            &lt;/fieldset&gt;
+        &lt;/g:form&gt;
+    &lt;/div&gt;
+
+    &lt;div id="navmenu"&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;g:link uri="/"&gt;&lt;g:message code="nav.home"/&gt;&lt;/g:link&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;g:link controller="product" action="list"&gt;&lt;g:message code="nav.products"/&gt;&lt;/g:link&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;g:layoutBody/&gt;
+
+&lt;div id="footer"&gt;
+    &lt;p&gt;Copyright &copy; 2011 Hubert A. Klein Ikkink - &lt;a href="http://www.mrhaki.com"&gt;mrhaki&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>For our homepage we define a layout with five blocks. We use Sitemesh content blocks in our layout. This way we can define content blocks in the pages and reference these components in the layouts. To reference a content block we use the <code>&lt;g:pageProperty .../&gt;</code> tag. The name attribute contains the name of the content block we want to reference. Notice we reference our main layout page with <code>&lt;meta name="layout" content="page"/&gt;</code>.</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/layout/fiveblocks.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta name="layout" content="page"/&gt;
+        &lt;title&gt;&lt;g:layoutTitle/&gt;&lt;/title&gt;
+        &lt;g:layoutHead/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div id="banner"&gt;
+            &lt;g:pageProperty name="page.banner"/&gt;
+        &lt;/div&gt;
+
+        &lt;div id="left"&gt;
+            &lt;g:pageProperty name="page.left1"/&gt;
+            &lt;g:pageProperty name="page.left2"/&gt;
+            &lt;g:pageProperty name="page.left3"/&gt;
+
+            &lt;div id="box-left"&gt;
+                &lt;g:pageProperty name="page.box-left"/&gt;
+            &lt;/div&gt;
+
+            &lt;div id="box-right"&gt;
+                &lt;g:pageProperty name="page.box-right"/&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div id="right"&gt;
+            &lt;g:pageProperty name="page.right1"/&gt;
+            &lt;g:pageProperty name="page.right2"/&gt;
+            &lt;g:pageProperty name="page.right3"/&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>And in the homepage Groovy server page we can use the <code>&lt;g:applyLayout .../&gt;</code> tag and define the content for our Sitemesh content blocks.</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/templates/homepage.gsp --%&gt;
+&lt;g:applyLayout name="fiveblocks"&gt;
+    &lt;head&gt;
+        &lt;title&gt;&lt;g:message code="title.homepage"/&gt;&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;content tag="banner"&gt;
+        &lt;h1&gt;Welcome to Grails Layout Demo&lt;/h1&gt;
+    &lt;/content&gt;
+
+    &lt;content tag="left1"&gt;
+        &lt;p&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+
+    &lt;content tag="box-left"&gt;
+        &lt;p&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+
+    &lt;content tag="box-right"&gt;
+        &lt;p&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+
+    &lt;content tag="right1"&gt;
+        &lt;p&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+&lt;/g:applyLayout&gt;
+</pre>
+<p>We also define a layout with one block:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/layout/oneblock.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta name="layout" content="page"/&gt;
+        &lt;title&gt;&lt;g:layoutTitle/&gt;&lt;/title&gt;
+        &lt;g:layoutHead/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div id="main"&gt;
+            &lt;g:pageProperty name="page.main1"/&gt;
+            &lt;g:pageProperty name="page.main2"/&gt;
+            &lt;g:pageProperty name="page.main3"/&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>And a layout with two columns:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/layout/twoblocks.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta name="layout" content="page"/&gt;
+        &lt;title&gt;&lt;g:layoutTitle/&gt;&lt;/title&gt;
+        &lt;g:layoutHead/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div id="left"&gt;
+            &lt;g:pageProperty name="page.left1"/&gt;
+            &lt;g:pageProperty name="page.left2"/&gt;
+            &lt;g:pageProperty name="page.left3"/&gt;
+        &lt;/div&gt;
+
+        &lt;div id="right"&gt;
+            &lt;g:pageProperty name="page.right1"/&gt;
+            &lt;g:pageProperty name="page.right2"/&gt;
+            &lt;g:pageProperty name="page.right3"/&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+<p>Then we use these layouts in the product list and details views:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/templates/productlist.gsp --%&gt;
+&lt;g:applyLayout name="oneblock"&gt;
+    &lt;head&gt;
+        &lt;title&gt;&lt;g:message code="title.product.list"/&gt;&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;content tag="main1"&gt;
+        &lt;h1&gt;&lt;g:message code="products.list"/&gt;&lt;/h1&gt;
+        &lt;ul class="product-list"&gt;
+        ...
+        &lt;/ul&gt;
+    &lt;/content&gt;
+&lt;/g:applyLayout&gt;
+</pre>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/templates/productview.gsp --%&gt;
+&lt;g:applyLayout name="twoblocks"&gt;
+    &lt;head&gt;
+        &lt;title&gt;${product.title}&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;content tag="left1"&gt;
+        &lt;h1&gt;${product.title}&lt;/h1&gt;
+
+        &lt;p class="product-body"&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+
+    &lt;content tag="right1"&gt;
+        &lt;p&gt;...&lt;/p&gt;
+    &lt;/content&gt;
+&lt;/g:applyLayout&gt;
+</pre>
+<p>Because this is only a small sample application this might seem like overhead, but for a bigger application it is really useful to have reusable layouts. The following screenshots show the layouts in action for a Grails application.</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://1.bp.blogspot.com/-ibpb232wK3Q/TZTkcLuKYRI/AAAAAAAAErc/UIt5EzWHaus/s1600/grails-layout-result-homepage.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="164" width="320" src="http://1.bp.blogspot.com/-ibpb232wK3Q/TZTkcLuKYRI/AAAAAAAAErc/UIt5EzWHaus/s320/grails-layout-result-homepage.png" /></a></div>
+
+<p style="text-align:center;">Layout homepage</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/-PSoCO9Posck/TZTkcill-iI/AAAAAAAAErk/aS1utc5-AoE/s1600/grails-layout-result-productlist.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="183" width="320" src="http://2.bp.blogspot.com/-PSoCO9Posck/TZTkcill-iI/AAAAAAAAErk/aS1utc5-AoE/s320/grails-layout-result-productlist.png" /></a></div>
+
+<p style="text-align:center;">Layout product list</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/-RqhS9_yvRj0/TZTkc5oUcwI/AAAAAAAAErs/UMokz0Cn4XU/s1600/grails-layout-product-details.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="145" width="320" src="http://2.bp.blogspot.com/-RqhS9_yvRj0/TZTkc5oUcwI/AAAAAAAAErs/UMokz0Cn4XU/s320/grails-layout-product-details.png" /></a></div>
+
+<p style="text-align:center;">Layout product details</p>
+
+<p>Sources of the sample Grails application can be found at <a href="https://github.com/mrhaki/BlogSamples/tree/master/layout-demo">GitHub</a>.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

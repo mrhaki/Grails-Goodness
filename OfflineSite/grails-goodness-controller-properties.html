@@ -1,0 +1,69 @@
+<html>
+<head>
+
+<title>Grails Goodness: Controller Properties as Model</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Controller Properties as Model</h3>
+
+<div class="post">
+<p>To pass data from a controller to a view we must return a model. The model is a map with all the values we want to show on the Groovy Server Page (GSP). We can explicitly return a model from an action, but if we don't do that the controller's properties are passed as the model to the view. Remember that in Grails a new controller instance is created for each request. So it is save to use the properties of the controller as model in our views.</p>
+<pre class="brush:groovy">
+// File: grails-app/controllers/com/mrhaki/SampleController.groovy
+package com.mrhaki
+
+class SampleController {
+
+    def values = ['Grails', 'Groovy', 'Griffon', 'Gradle', 'Spock']
+
+    def greeting
+
+    def index = {
+        greeting = 'Welcome to My Blog'
+        // Don't return a model, so the properties become the model.
+    }
+}
+</pre>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/sample/index.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;${greeting}&lt;/h1&gt;
+
+        &lt;g:join in="${values}"/&gt; rock!
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

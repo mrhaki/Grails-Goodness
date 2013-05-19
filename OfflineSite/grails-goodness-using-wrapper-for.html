@@ -1,0 +1,63 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Wrapper for Running Grails Commands Without Grails Installation</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Wrapper for Running Grails Commands Without Grails Installation</h3>
+
+<div class="post">
+<p>Since Grails 2.1 we can create a Grails wrapper. The wrapper allows developer to run Grails commands in a project without installing Grails first. The wrapper concept is also available in other projects from the Groovy ecosystem like Gradle or Griffon. A wrapper is a shell script for Windows, OSX or Linux named <code>grailsw.bat</code> or <code>grailsw</code> and a couple of JAR files to automatically download a specific version of Grails. We can check in the shell scripts and supporting files into a version control system and make it part of the project. Developers working on the project simply check out the code and execute the shell script. If there is no Grails installation available then it will be downloaded.</p><p>To create the shell scripts and supporting files someone on the project must run the <em>wrapper</em> command for the first time. This developer must have a valid Grails installation. The files that are generated can then be added to version control and from then one developers can use the <code>grailsw</code> or <code>grailsw.bat</code> shell scripts.</p><pre class="brush:shell">$ grails wrapper
+| Wrapper installed successfully
+$ 
+</pre><p>In the root of the project we have two new files <code>grailsw</code> and <code>grailsw.bat</code>. Windows users can uss <code>grailsw.bat</code> and on other operating systems we use <code>grailsw</code>. Also a new directory <code>wrapper</code> is created with three files:</p><pre class="brush:plain;light:true">grails-wrapper-runtime-2.2.0.jar 
+grails-wrapper.properties  
+springloaded-core-1.1.1.jar
+</pre><p>When we run the <code>grailsw</code> or <code>grailsw.bat</code> scripts for the first time we see how Grails is downloaded and installed into the  <code>$USER_HOME/.grails/wrapper</code> directory. The following output shows that the file is downloaded and extracted when we didn't run the <code>grailsw</code> script before:</p><pre class="brush:shell">$ ./grailsw --version
+Downloading http://dist.springframework.org.s3.amazonaws.com/release/GRAILS/grails-2.2.0.zip to /Users/mrhaki/.grails/wrapper/grails-2.2.0-download.zip
+.....................................................................................
+................................................................
+Extracting /Users/mrhaki/.grails/wrapper/grails-2.2.0-download.zip to /Users/mrhaki/.grails/wrapper/2.2.0
+
+Grails version: 2.2.0
+</pre><p>When we want to use a new version of Grails one of the developers needs to run to run <code>$ grails upgrade</code> followed by <code>$ grails wrapper</code> with the new Grails version. Notice this developer needs to have a locally installed Grails installation of the version we want to create a wrapper for. The newly generated files can be checked in to version control and all developers on the project will have the new Grails version when they run the <code>grails</code> or <code>grailsw.bat</code> shell scripts.</p><pre class="brush:shell">$ ./grailsw --version
+Downloading http://dist.springframework.org.s3.amazonaws.com/release/GRAILS/grails-2.2.1.zip to /Users/mrhaki/.grails/wrapper/grails-2.2.1-download.zip
+.....................................................................................
+...
+................................................................
+Extracting /Users/mrhaki/.grails/wrapper/grails-2.2.1-download.zip to /Users/mrhaki/.grails/wrapper/2.2.1
+
+Grails version: 2.2.1
+</pre><p>We can change the download location of Grails to for example a company intranet URL. In the <code>wrapper/</code> directory we see the file <code>grails-wrapper.properties</code>. The file has one property <code>wrapper.dist.url</code>, which by default refers to <code>http://dist.springframework.org.s3.amazonaws.com/release/GRAILS/</code>. We can change this to another URL, add the change to version control so other developers will get the change automatically. And when the <code>grailsw</code> shell script is executed the download location will be another URL. To set a different download URL when generating the wrapper we can use the command-line option <em>--distributionUrl</em>:</p><pre class="brush:shell">$ grails wrapper --distributionUrl=http://company.intranet/downloads/grails-releases/
+</pre><p>If we don't like the default name for the directory to store the supporting files we can use the command-line option <em>--wrapperDir</em>. The files are then stored in the given directory and the <code>grailsw</code> and <code>grailsw.bat</code> shell scripts will contain the given directory name.</p><p><em>Written with Grails 2.2.0 and 2.2.1</em></p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

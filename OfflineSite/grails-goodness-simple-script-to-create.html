@@ -1,0 +1,67 @@
+<html>
+<head>
+
+<title>Grails Goodness: Simple Script to Create WAR Files for Each Environment</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Simple Script to Create WAR Files for Each Environment</h3>
+
+<div class="post">
+<p>We can create a new WAR file with the following Grails command:</p>
+<pre class="brush:plain;light:true">
+$ grails test war dist/test.war
+</pre>
+<p>This will make a new WAR file in the <code>dist</code> directory with the name <code>test.war</code>. We use the test environments for the settings.</p>
+<p>With the following Groovy script we create a WAR file in the <code>dist</code> for each environment. We use <code>application.properties</code> to get the application name and version and use it to create the WAR filename.</p>
+<pre class="brush:groovy">
+// File: createwar.groovy
+// Run with: $ groovy createwar.groovy
+def ant = new AntBuilder()
+
+// Read properties.
+ant.property file: 'application.properties'
+
+def appVersion = ant.project.properties.'app.version'
+def appName = ant.project.properties.'app.name'
+
+def envs = ['dev', 'test', 'prod', 'testserver1', 'testserver2']
+envs.each { env -&gt;
+    def grailsEnv = env
+    ant.exec(executable: 'grails') {
+        arg(value: "-Dgrails.env=${grailsEnv}")
+        arg(value: 'war')
+        arg(value: "dist/${appName}-${appVersion}-${grailsEnv}.war")
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

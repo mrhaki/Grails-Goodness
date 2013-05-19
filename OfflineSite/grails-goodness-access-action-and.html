@@ -1,0 +1,62 @@
+<html>
+<head>
+
+<title>Grails Goodness: Access Action and Controller Name in GSP</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Access Action and Controller Name in GSP</h3>
+
+<div class="post">
+<p>In our GSP views we can see the name of the action and controller that resulted in the view. We can use this for example to show or hide certain information based on the values for the action and controller name. Grails injects the variables <em>actionName</em> and <em>controllerName</em> automatically and sets the values based on the action and controller.</p><pre class="brush:groovy">// File: grails-app/controller/com/mrhaki/sample/ViewController.groovy
+package com.mrhaki.sample
+
+class ViewController {
+
+    def index = {}
+}
+</pre><pre class="brush:groovy">&lt;%-- File: grails-app/views/view/index.gsp --%&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;GSP Sample&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Action and Controller Name&lt;/h1&gt;
+
+        &lt;ul&gt;
+            &lt;li&gt;controllerName: &lt;strong&gt;${controllerName}&lt;/strong&gt;&lt;/li&gt;
+            &lt;li&gt;actionName: &lt;strong&gt;${actionName}&lt;/strong&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre><p>When we open the GSP we get the following output:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-7TJejO4-0v4/Ts9Jdk-H6oI/AAAAAAAAFC4/jcP03Xi7dyg/s1600/Screen%2Bshot%2B2011-11-25%2Bat%2B8.52.54%2B.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="90" width="320" src="http://3.bp.blogspot.com/-7TJejO4-0v4/Ts9Jdk-H6oI/AAAAAAAAFC4/jcP03Xi7dyg/s320/Screen%2Bshot%2B2011-11-25%2Bat%2B8.52.54%2B.png" /></a></div><br /
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

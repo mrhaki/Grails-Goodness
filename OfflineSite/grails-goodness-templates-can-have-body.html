@@ -1,0 +1,64 @@
+<html>
+<head>
+
+<title>Grails Goodness: Templates Can Have a Body</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Templates Can Have a Body</h3>
+
+<div class="post">
+<p>To create a more modular Groovy Server Page we can use Grails' <a href="http://grails.org/doc/latest/guide/single.html#6.2.3%20Views%20and%20Templates">template</a> support. We use <code>&lt;g:render template="..." ... /&gt;</code> or <code>&lt;tmpl:templateName ... /&gt;</code> tags to render the template content. These tags can have a body. The body of the tag is then available in the template code. We use the expression <code>${body()}</code> in our template to output the body content.</p>
+<p>Suppose we have the following template code:</p>
+<pre class="brush:html">
+&lt;%-- File: grails-app/views/product/_productView.gsp --%&gt;
+&lt;h2&gt;${product.name}&lt;/h2&gt;
+
+${body()}
+</pre>
+<p>We can use the template with different body contents:</p>
+<pre class="brush:html">
+...
+&lt;g:each in="${products}" var="product"&gt;
+    &lt;g:render template="productView" model="[product: product]"&gt;
+        &lt;g:link uri="/"&gt;Back to home&lt;/g:link&gt;
+    &lt;/g:render&gt;
+&lt;/g:each&gt;
+...
+&lt;g:each in="${products}" var="product"&gt;
+    &lt;tmpl:productView product="${product}"&gt;
+        &lt;g:link controller="product" action="details" id="${product.id}"&gt;More details&lt;/g:link&gt;
+    &lt;/tmpl:productView&gt;
+&lt;/g:each&gt;
+...
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

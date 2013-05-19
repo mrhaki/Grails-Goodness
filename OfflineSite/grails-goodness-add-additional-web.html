@@ -1,0 +1,78 @@
+<html>
+<head>
+
+<title>Grails Goodness: Add Additional Web Application to Tomcat</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Add Additional Web Application to Tomcat</h3>
+
+<div class="post">
+<p>In this post we learn how to add an additional WAR file to the Tomcat context when we use <code>$ grails run-app</code>. Recently I was working on a Alfresco Web Quick Start integration with Grails (<a href="https://github.com/VXCompany/wcmquickstart/">current progress on GitHub</a>). Alfresco offers inline editing of the web content with the help of an extra Java web application. This web application needs to be accessible from the Grails application, so at development time I want to deploy this web application when I use <code>$ grails run-app</code> at web context <em>/awe</em>. But this scenario is also applicable if for example we use SoapUI to create a WAR file with mocked web services and we want to access it from our Grails application.</p>
+<p>I found two sources via Google: <a href="http://padcom13.blogspot.com/2011/03/grails-tomcat-and-additional-contexts.html">Grails, Tomcat and additional contexts</a> and <a href="http://krollrich.blogspot.com/2009/12/run-java-web-application-within-grails.html">Run a Java web application within grails</a>. It turns out Grails fires a <em>configureTomcat</em> event when we use <code>$ grails run-app</code>, with a Tomcat instance as argument. We can configure this Tomcat instance with additional information. With the <code>addWebapp()</code> method we can add an additional context to Tomcat. We can use a directory or WAR file and we must define the context name we want to use. And furthermore we can add extra directories that are added to the classpath of the additional web application. We must create a <code>WebappLoader</code> instance from Tomcat's classloader and then we can use the <code>addRepository()</code> method to add directories to the classpath.</p>
+<p>For my use case I had a web application packaged as a WAR file: <code>awe.war</code> and it must be deployed with the context <em>/awe</em>. Furthermore extra configuration for the web application is done with a XML file found in the classpath, so we add an extra directory to the classpath of the web application.</p>
+<pre class="brush:groovy">
+import org.apache.catalina.loader.WebappLoader
+
+eventConfigureTomcat = { tomcat -&gt;
+    // Use directory in the project's root for the
+    // WAR file and extra directory to be included in the
+    // web application's classpath.
+    def aweWebappDir = new File(grailsSettings.baseDir, 'awe')
+    def aweSharedDir = new File(aweWebappDir, 'shared')
+
+    // Location of WAR file.
+    def aweWarFile = new File(aweWebappDir, 'awe.war')
+
+    // Context name for web application.
+    def aweContext = '/awe'
+
+    // Add WAR file to Tomcat as web application
+    // with context /awe. 
+    def context = tomcat.addWebapp(aweContext, aweWarFile.absolutePath)
+    // Context is not reloadable, but can be 
+    // if we want to.
+    context.reloadable = false
+
+    // Add extra directory to web application's
+    // classpath for referencing configuration file needed
+    // by the web application.
+    def loader = new WebappLoader(tomcat.class.classLoader)
+    loader.addRepository(aweSharedDir.toURI().toURL().toString())
+    loader.container = context
+
+    // Add extra loader to context.
+    context.loader = loader
+}
+</pre>
+<p>We start our development Grails environment with <code>$ grails run-app</code> and the web application is available at <code>http://localhost:8080/awe/</code>, next to the Grails' application path.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

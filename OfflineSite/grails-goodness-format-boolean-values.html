@@ -1,0 +1,55 @@
+<html>
+<head>
+
+<title>Grails Goodness: Format Boolean Values with the formatBoolean Tag</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Format Boolean Values with the formatBoolean Tag</h3>
+
+<div class="post">
+<p>If we want to display something else than <em>true</em> or <em>false</em> for a boolean value on our Groovy Server Page (GSP) we can use the <code>formatBoolean</code> tag. We can specify a value for true with the <em>true</em> attribute and for false with the <em>false</em> attribute. If we don't specify a <em>true</em> or <em>false</em> attribute Grails will look for the key <code>boolean.true</code> and <code>boolean.false</code> in the i18n resource bundle. If those are not found than the keys <code>default.boolean.true</code> and <code>default.boolean.false</code> are used. And the last fallback are the values <code>True</code> for true and <code>False</code> for false boolean values.</p>
+<pre class="brush:plain">
+// File: grails-app/i18n/messages.properties
+boolean.true=Okay
+boolean.false=Not okay
+</pre>
+<pre class="brush:html">
+&lt;%-- Sample.gsp --%&gt;
+
+&lt;g:formatBoolean boolean="${true}"/&gt; outputs: Okay
+&lt;g:formatBoolean boolean="${false}"/&gt; outputs: Not okay
+
+&lt;g:formatBoolean boolean="${true}" true="Yes" false="No"/&gt; outputs: Yes
+&lt;g:formatBoolean boolean="${false}" true="Yes" false="No"/&gt; outputs: No
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

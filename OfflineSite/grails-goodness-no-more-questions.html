@@ -1,0 +1,41 @@
+<html>
+<head>
+
+<title>Grails Goodness: No More Questions</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: No More Questions</h3>
+
+<div class="post">
+<p>Sometimes when we run Grails commands we get asked questions via user prompts. For example if we invoke <code>$ grails create-domain-class Simple</code> we get a message that it is good practice to use package names and the question "Do you want to continue? (y,n)". We need to answer this question to continue, but what if we are not able to answer the question, for example if the script is run on a continuous integration server? We pass the argument <code>--non-interactive</code> to the grails command and now we don't get a question and the script continues by using the default value for the answer. So in our example we can run <code>$ grails create-domain-class Simple --non-interactive</code>.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

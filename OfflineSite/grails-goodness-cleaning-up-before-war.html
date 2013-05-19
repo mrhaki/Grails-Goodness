@@ -1,0 +1,54 @@
+<html>
+<head>
+
+<title>Grails Goodness: Cleaning Up Before WAR Creation</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Cleaning Up Before WAR Creation</h3>
+
+<div class="post">
+<p>Grails provides a mechanism where we can execute a closure to <em>do stuff</em> before we create a WAR file. Technically speaking we can change the contents of the staging directory. So when we run the application as an exploded WAR file or we create a WAR file in both cases the closure is executed.</p>
+<p>The closure is very useful to delete files we don't want to be in the final WAR file, but are copied by default. We define the closure in <code>conf/BuildConfig.groovy</code> and it must be named <code>grails.war.resources</code>. The closure has a parameter which is the staging directory. The context of the closure is <code>AntBuilder</code>, so all methods we define in the closure are executed for an <code>AntBuilder</code> object. For example if we normally would use the following statement: <code>ant.echo(message: 'Hello')</code>, we must now use <code>echo(message: 'Hello')</code>. The <code>ant</code> object is implicit for the context of the closure.</p>
+<p>In the following sample we want to delete the <code>Thumbs.db</code> files Windows generates from the application:</p>
+<pre class="brush:groovy">
+// File: conf/BuildConfig.groovy
+grails.war.resources = { stagingDir ->
+    echo message: "StagingDir: $stagingDir"
+    delete(verbose: true) {
+        fileset(dir: stagingDir) {
+            include name: '**/Thumbs.db'
+        }
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

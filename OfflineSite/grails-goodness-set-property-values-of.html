@@ -1,0 +1,74 @@
+<html>
+<head>
+
+<title>Grails Goodness: Set Property Values of Spring Beans in resources.groovy</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Set Property Values of Spring Beans in resources.groovy</h3>
+
+<div class="post">
+<p>We can configure Spring beans using several methods in Grails. We can for example add them to <code>grails-app/conf/spring/resources.xml</code> using Spring's XML syntax. But we can also use a more Groovy way with <code>grails-app/conf/spring/resources.groovy</code>. We can use a DSL to define or configure Spring beans that we want to use in our Grails application. Grails uses <a href="http://grails.org/doc/latest/api/grails/spring/BeanBuilder.html">BeanBuilder</a> to parse the DSL and populate the Spring application context.</p><p>To define a bean we use the following syntax <code>beanName(BeanClass)</code>. If we want to set a property value for the bean we use a closure and in the closure we set the property values. Let's first create a simple class we want to configure in the Spring application context:</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/spring/Person.groovy
+package com.mrhaki.spring
+
+import groovy.transform.ToString
+
+@ToString
+class Person {
+    String name
+    Date birthDate
+}
+</pre><p>Next we configure the bean in <code>resources.groovy</code>:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.spring.Person
+
+beans = {
+
+    mrhaki(Person) {
+        name = 'mrhaki'
+        birthDate = Date.parse('yyyy-MM-dd', '1973-7-9')
+    }
+
+}
+</pre><p>There is also an alternative syntax using Groovy's support for <a href="http://mrhaki.blogspot.com/2009/09/groovy-goodness-named-parameters-are.html">named method arguments</a>. In Groovy named arguments are all grouped into a <code>Map</code> object and passed as the first argument. The BeanBuilder DSL supports this feature. When we define a bean we can use named arguments for the property names and values, use the <code>BeanClass</code> argument and automatically this will be converted to <code>Map</code> and <code>BeanClass</code> type arguments.</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.spring.Person
+
+beans = {
+
+    // Using named arguments to set property values. The named arguments
+    // can be grouped together, but don't have to. Groovy will automatically
+    // group them together into a Map and makes it the first argument of 
+    // the 'mrhaki() bean definition method'.
+    mrhaki(name: 'mrhaki', Person, birthDate: Date.parse('yyyy-MM-dd', '1973-7-9'))
+
+}
+</pre><p>Written with Grails 2.2.1</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

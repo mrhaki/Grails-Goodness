@@ -1,0 +1,49 @@
+<html>
+<head>
+
+<title>Grails Goodness: Shortcut to Open Test Reports in Interactive Console</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Shortcut to Open Test Reports in Interactive Console</h3>
+
+<div class="post">
+<p>We can use the <em>open</em> command in the interactive console in Grails to open files. For example to edit the default layout view we can typ in the console:</p><pre class="brush:plain;light:true">grails&gt; open grails-app/views/layouts/main.gsp</pre><p>The application associated with GSP files starts and opens the file main.gsp.</p><p>So normally we have to pass actual filename with the complete path to the <em>open</em> command to open them. But Grails provides two shortcuts: <em>test-report</em> and <em>dep-report</em>. To see the output of our tests we can simply type <code>open test-report</code>:</p><pre class="brush:plain;light:true">grails&gt; test-app
+| Compiling 38 source files
+
+| Tests PASSED - view reports in target/test-reports
+grails&gt; open test-report
+</pre><p>Grails now opens the file <code>target/test-reports/html/index.html</code>.</p><p>The <em>dep-report</em> shortcut open the dependency report after we have run the <em>dependency-report</em> command:</p><pre class="brush:plain;light:true">grails&gt; dependency-report
+| Dependency report output to [/Users/mrhaki/samples/iconsole/target/dependency-report/index.html]
+grails&gt; open dep-report
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

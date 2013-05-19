@@ -1,0 +1,55 @@
+<html>
+<head>
+
+<title>Grails Goodness: Multiple Environments</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Multiple Environments</h3>
+
+<div class="post">
+<p>Grails supports different environments for configuring properties. Default we get a development, test and production environment, but we are free to add our own environments. We can define the new environment in for example <code>grails-app/conf/Config.groovy</code>. Next we can use the environment from the command line with the <code>-Dgrails.env=</code> option. Here we must use our newly created environment.</p>
+<pre class="brush:groovy">
+// grails-app/conf/Config.groovy
+environments {
+    development { ws.endpoint = 'http://localhost/ws.wsdl' }
+    test { ws.endpoint = 'http://test/ws.wsdl' }
+    production { ws.endpoint = 'http://ws.server/complete/ws.wsdl' }
+    testserver1 { ws.endpoint = 'http://testserver1/test/ws.wsdl' }
+    testserver2 { ws.endpoint = 'http://testserver2/test/ws.wsdl' }
+}
+</pre>
+<p>To create a new WAR file with the settings for the testserver2 environment we type the following command:</p>
+<pre class="brush:plain;light:true">
+$ grails -Dgrails.env=testserver2 war
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

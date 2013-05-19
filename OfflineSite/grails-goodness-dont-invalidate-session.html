@@ -1,0 +1,49 @@
+<html>
+<head>
+
+<title>Grails Goodness: Don't Invalidate Session After Logout with Spring Security Plugin</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Don't Invalidate Session After Logout with Spring Security Plugin</h3>
+
+<div class="post">
+<p>The <a href="http://grails.org/plugin/spring-security-core">Spring security plugin</a> makes it easy to add authentication and autorization to our Grails application. The underlying Spring security framework is still accessible using Spring configuration and as a matter of fact the plugin uses a lot of the Spring security components. When we choose the logout action so-called logout handlers are configured and we can customize them in the Spring configuration of our Grails application.</p><p>One of the logout handlers is a Spring bean with the name <em>securityContextLogoutHandler</em> of type <code>org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler</code>. This handler will clear the security context and invalidate a HTTP session if it is available. If we don't want to invalidate the session we must reconfigure this Spring bean. The good thing is we can override bean definitions in our Grails application. For example we can define a bean in <code>grails-app/conf/spring/resources.groovy</code> with the same name <em>securityContextLogoutHandler</em> and type, but use different property values. In our sample we must set the property <code>invalidateHttpSession</code> of <code>org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler</code> to false. Now our session is not invalidated, but the security context is still cleared.</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler
+
+beans = {
+    securityContextLogoutHandler(SecurityContextLogoutHandler) {
+        invalidateHttpSession = false
+    }
+}
+</pre><p>Sample written with Grails 2.2.1 and Spring security core plugin 1.2.7.3</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

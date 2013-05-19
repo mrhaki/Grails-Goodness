@@ -1,0 +1,51 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Codecs in Test Classes</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Codecs in Test Classes</h3>
+
+<div class="post">
+<p>When we run Grails a lot of metaClass information is added to the classes of our application. This also include the support for encoding and decoding String values. For example in our Grails application we can use <code>"&lt;b&gt;Grails&lt;/b&gt;".encodeAsHTML()</code> and we get <code>"&amp;lt;b&amp;gt;Grails&amp;lt;/b&amp;gt;"</code>. But if we want to use the <code>encodeAsHTML()</code> method in our class we get an exception, because the method is not available. To make a Grails encoder/decoder available in our test class we must use the <code>loadCodec()</code> method. See the following example:</p>
+<pre class="brush:groovy">
+package com.mrhaki.grails
+
+class HTMLCodecControllerTests extends grails.test.ControllerUnitTestCase {
+    void testAction() {
+        loadCodec HTMLCodec  // Now we can use encodeAsHTML, decodeAsHTML
+        assertEquals "&amp;lt;b&amp;gt;Grails&amp;lt;/b&amp;gt;", '&lt;b&gt;Grails&lt;/b&gt;'.encodeAsHTML()
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

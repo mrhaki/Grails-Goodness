@@ -1,0 +1,134 @@
+<html>
+<head>
+
+<title>Grails Goodness: Internationalize Javascript Messages with JAWR Plugin</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Internationalize Javascript Messages with JAWR Plugin</h3>
+
+<div class="post">
+<p>Grails has great builtin support for <a href="http://grails.org/doc/latest/guide/10.%20Internationalization.html">internationalization (i18n)</a>. The underlying Spring support for i18n is used. We can easily change for example text on views based on the user's locale. But this only applies for the server side of our code. So we can generate the correct messages and labels based on the user's locale on the server, but not in our Javascript code. What if we want to display a localized message in a bit of Javascript code, that is not created on the server? Why do I add this extra information 'not created on the server'? Because we can still generate Javascript code in a view or use the gsp-resources plugin to create Javascript on the server. This code can contain the output of a localized message and can be used in Javascript. But that is not what we want for this blog post. Here we are going to reference our i18n messages from plain, non-generated Javascript code.</p><p>We can achieve this with the <a href="http://grails.org/plugin/jawr">JAWR plugin</a>. The plugin provides roughly the same functionality as the <a href="http://grails.org/plugin/resources">resources plugin</a> for bundling resources efficiently in a Grails application. We are not interested in that part, but the JAWR library used by the plugin also has a i18n messages generator. And we are going to use that in our Grails application to get localized Javascript messages.</p><p>First we must install the JAWR plugin: <code>$ grails install-plugin jawr</code>. Next we can configure the plugin. We open our <code>grails-app/conf/Config.groovy</code> file and add:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+
+jawr {
+    js {
+        // Specific mapping to disable resource handling by plugin.
+        mapping = '/jawr/'
+
+        bundle {
+            lib {
+                // Bundle id is used in views.
+                id = '/i18n/messages.js'
+
+                // Tell which messages need to localized in Javascript.
+                mappings = 'messages:grails-app.i18n.messages'
+            }
+        }
+    }
+    locale {
+        // Define resolver so ?lang= Grails functionality works with controllers.
+        resolver = 'net.jawr.web.resource.bundle.locale.SpringLocaleResolver'
+    }
+}
+
+...
+</pre><p>At line 6 we define a mapping. If we don't define a mapping the JAWR plugin will also act as a resource and bundling plugin, but for this example we only want to use the i18n messages generator.</p><p>Line 14 defines which resource in the classpath contains the messages that need to be accessible in Javascript. For our Grails application we want the messages from  <code>messages.properties</code> (and the locale specific versions) so we define <code>grails-app.i18n.messages</code>.</p><p>With Grails it is easy to switch to a specific user locale by adding the request parameter <em>lang</em> to a request. At line 20 we add a resolver that will use the Grails locale resolver to determine a user's locale.</p><p>It it time to see our Javascript in action. First we create two new message labels in <code>messages.properties</code>. One without variables and one with a variable placeholder to show how the JAWR plugin supports this:</p><pre class="brush:groovy">// File: grails-app/i18n/messages.properties
+js.sample.hello.message=Hello
+js.sample.hello.user.message=Hello {0}
+</pre><p>Let's add a Dutch version of these messages in <code>grails-app/i18n/messages_nl.properties</code>:</p><pre class="brush:groovy">// File: grails-app/i18n/messages_nl.properties
+js.sample.hello.message=Hallo
+js.sample.hello.user.message=Hallo {0}
+</pre><p>Now it is time to create a GSP view with a simple controller (only request through a controller will be able to use the locale resolver we defined in our configuration).</p><pre class="brush:groovy">// File: grails-app/controller/grails/js/i18n/SampleController.groovy
+package grails.js.i18n
+
+class SampleController {
+    def index = {
+        // render 'sample/index.gsp'
+    }
+}
+</pre><pre class="brush:html">%{-- File: grails-app/views/sample/index.gsp --}%
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta name="layout" content="main"/&gt;
+        &lt;jawr:script src="/i18n/messages.js"/&gt;
+        &lt;g:javascript library="application"/&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Simple message&lt;/h1&gt;
+
+        &lt;input type="button" onclick="showAlertHello();" value="Hello"/&gt;
+
+        &lt;hr/&gt;
+
+        &lt;h1&gt;Message with variable placeholder&lt;/h1&gt;
+
+        Username: &lt;input type="text" id="username" size="30"/&gt;
+
+        &lt;input type="button" onclick="showAlertUsername();" value="Hello"/&gt;
+
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre><p>At line 4 we inlude the Javascript i18n messages generated by the JAWR plugin. And at line 5 we include an external Javascript file that will use the generated messages:</p><pre class="brush:javascript">// File: web-app/js/application.js
+
+function showAlertHello() {
+    var alertMessage = messages.js.sample.hello.message();
+    alert(alertMessage);
+}
+
+function showAlertUsername() {
+    var usernameValue = document.getElementById("username").value;
+    var alertMessage = messages.js.sample.hello.username.message(usernameValue);
+    alert(alertMessage);
+}
+</pre><p>Notice how we can access the i18n messages in Javascript. The plugin will convert the messages to Javascript functions to return the message. And even variable substitution is supported (see line 9).</p><p>The following screenshots show the alert messages for the default locale and for a request with the Dutch locale:</p><br />
+<div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-elOkExcL0Kc/TsC_wTomUoI/AAAAAAAAE_w/DWNXGW-fcts/s1600/simple-js.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="199" width="320" src="http://2.bp.blogspot.com/-elOkExcL0Kc/TsC_wTomUoI/AAAAAAAAE_w/DWNXGW-fcts/s320/simple-js.png" /></a></div><br />
+<div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-f093wR0S1BI/TsC_wXT6cGI/AAAAAAAAE_4/fOKwnkxigy8/s1600/simple-js-nl.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="198" width="320" src="http://2.bp.blogspot.com/-f093wR0S1BI/TsC_wXT6cGI/AAAAAAAAE_4/fOKwnkxigy8/s320/simple-js-nl.png" /></a></div><br />
+<div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-Mp8t4sHh8cU/TsC_wnU7MxI/AAAAAAAAFAE/9_4xKeJPRJU/s1600/placeholder-js.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="198" width="320" src="http://4.bp.blogspot.com/-Mp8t4sHh8cU/TsC_wnU7MxI/AAAAAAAAFAE/9_4xKeJPRJU/s320/placeholder-js.png" /></a></div><br />
+<div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-n9DiPT4mVi4/TsC_wzpDplI/AAAAAAAAFAU/1cmLbF2iJgU/s1600/placeholder-js-nl.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="198" width="320" src="http://1.bp.blogspot.com/-n9DiPT4mVi4/TsC_wzpDplI/AAAAAAAAFAU/1cmLbF2iJgU/s320/placeholder-js-nl.png" /></a></div><br />
+<p>With the current configuration of the JAWR plugin all messages in the <code>messages.properties</code> (and locale versions) will be exported to Javascript messages. But maybe this is too much and we only want to include a subset of the messages in the generated Javascript. In the configuration we can define a prefix for the messages to be exported or we can even define a separate properties file with only messages necessary for Javascript:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+// Only filter messages starting with js.
+jawr.js.bundle.lib.mappings=messages:grails-app.i18n.messages[js]
+...
+</pre><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+// Use a different properties file: jsmessages.properties (jsmessages_nl.properties, ...).
+jawr.js.bundle.lib.mappings=messages:grails-app.i18n.jsmessages
+...
+</pre><p>In our Javascript we reference the messages by prefixing <code>messages.</code> to the message properties. We can change this as well in our JAWR plugin configuration. If for example we want to use <em>i18n</em> we must define our plugin as follows:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+// Define custom namespace for reference in Javascript.
+jawr.js.bundle.lib.mappings=messages:grails-app.i18n.messages(i18n)
+...
+</pre><p>With the use of the JAWR plugin and the i18n messages generator we can easily use localized messages in our Javascript code.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

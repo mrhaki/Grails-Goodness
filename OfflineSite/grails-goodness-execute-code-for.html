@@ -1,0 +1,65 @@
+<html>
+<head>
+
+<title>Grails Goodness: Execute Code for Current Environment</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Execute Code for Current Environment</h3>
+
+<div class="post">
+<p>In Grails we can use the <code>Environment</code> class to execute code for specific environments. The method <code>executeForCurrentEnvironment()</code> takes a closure with the different environments and the code to be executed. This provides an elegant way to execute different blocks of code depending on the current environment.</p><p>The following sample is a simple controller where we set the value of the <code>result</code> variable depending on the environment. Besides the default environments - development, test, production - we can define our own custom environments. In the controller we provide the custom environment <em>myenv</em>.</p><pre class="brush:groovy">package environment
+
+import grails.util.Environment
+
+class ExecuteController {
+
+    def index = { 
+        def result
+     
+        Environment.executeForCurrentEnvironment {
+            development {
+                result = 'Running in DEV mode.'
+            }
+            production {
+                result = 'Running in production mode.'
+            }
+            myenv {
+                result = 'Running in custom "myenv" mode.'
+            }
+        }
+    
+        render result
+    }
+}
+</pre><p>We we run the Grails application with <code>$ grails run-app</code> and go to the URL http://localhost:8080/app/execute, we get the following output: <code>Running in DEV mode.</code>. When we run <code>$ grails -Dgrails.env=myenv run-app</code> we get the following output in our browser: <code>Running in custom "myenv" mode.</code>.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

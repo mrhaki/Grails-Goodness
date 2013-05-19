@@ -1,0 +1,92 @@
+<html>
+<head>
+
+<title>Grails Goodness: Type Conversion on Parameters</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Type Conversion on Parameters</h3>
+
+<div class="post">
+<p>With Grails we get a lot of extra support for handling request parameters. We can convert a request parameter value to a specific type with a simple method invocation. Grails adds for example the method <code>int()</code> to the parameter so we can return the request parameter value converted to an <code>int</code>. Grails adds several methods like <code>byte()</code>, <code>long()</code>, <code>boolean()</code> we can use in our code. And since Grails 2.0 also <a href="http://mrhaki.blogspot.com/2012/01/grails-goodness-date-request-parameter.html">support for dates</a>.</p><p>Update: it is also possible to get the <a href="http://mrhaki.blogspot.com/2010/03/grails-goodness-get-values-from.html">values from request parameters with the same name</a>.</p><pre class="brush:groovy">class SimpleController {
+    def submit = {
+        def intValue = params.int('paramInt')
+        def shortValue = params.short('paramShort')
+        def byteValue = params.byte('paramByte')
+        def longValue = params.long('paramLong')
+        def doubleValue = params.double('paramDouble')
+        def floatValue = params.float('paramFloat')
+        def booleanValue = params.boolean('paramBoolean')
+        [ intValue: intValue, shortValue: shortValue, 
+          byteValue: byteValue,
+          longValue: longValue, doubleValue: doubleValue, 
+          floatValue: floatValue, booleanValue: booleanValue ]
+    }
+}
+</pre><p>We can run the following testcase to test the various parameter types and values.</p><pre class="brush:groovy">import grails.test.*
+
+class SimpleControllerTests extends ControllerUnitTestCase {
+    void testParams() {
+        controller.params.paramInt = '42'
+        controller.params.paramShort = '128'
+        controller.params.paramByte = '8'
+        controller.params.paramLong = '90192'
+        controller.params.paramDouble = '12.3'
+        controller.params.paramFloat = '901.22'
+        controller.params.paramBoolean = 'true'
+
+        def result = controller.submit()
+        assertEquals 42, result.intValue
+        assertEquals 128, result.shortValue
+        assertEquals 8, result.byteValue
+        assertEquals 90192L, result.longValue
+        assertEquals 12.3, result.doubleValue
+        assertEquals 901.22f, result.floatValue
+        assertTrue result.booleanValue
+    }
+    
+    void testInvalidParams() {
+        controller.params.paramInt = 'test'
+
+        def result = controller.submit()
+        assertNull result.intValue
+    }
+    
+    void testBooleanParam() {
+        controller.params.paramBoolean = 'false'
+        def result = controller.submit()
+        assertFalse result.booleanValue
+    }
+}
+
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

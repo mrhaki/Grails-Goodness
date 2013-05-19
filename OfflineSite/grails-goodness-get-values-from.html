@@ -1,0 +1,51 @@
+<html>
+<head>
+
+<title>Grails Goodness: Get Values from Parameters with Same Name</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Get Values from Parameters with Same Name</h3>
+
+<div class="post">
+<p>Grails supports <a href="http://mrhaki.blogspot.com/2010/02/grails-goodness-type-conversion-on.html">type conversion on request parameters</a>. But it is also easy to handle multiple request parameters with the same name in Grails. We use the <code>list()</code> method on the <code>params</code> and we are sure we get back a list with values. Even if only one parameter with the given name is returned we get back a list.</p><pre class="brush:groovy">// File: grails-app/controllers/SimpleController.groovy
+class SimpleController {
+
+    def test = {
+        // Handles a query like 'http://localhost:8080/simple?role=admin&role=user'
+        def roles = params.list('role')
+        render roles.join(',')  // Returns admin,user
+    }
+
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

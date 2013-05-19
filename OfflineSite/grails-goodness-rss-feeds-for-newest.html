@@ -1,0 +1,54 @@
+<html>
+<head>
+
+<title>Grails Goodness: RSS Feeds for Newest and Recently Updated Plugins</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: RSS Feeds for Newest and Recently Updated Plugins</h3>
+
+<div class="post">
+<p>At the Grails plugins website we can see <a href="http://www.grails.org/plugin/category/newest">the newest</a> and <a href="http://www.grails.org/plugin/category/recentlyUpdated">last updated</a> plugins. But there are no RSS feeds for these page (<strong>Update:</strong> Looking at the source code I found a RSS feed URL for the last updated plugins. We can use the <a href="http://www.grails.org/plugin/latest?format=atom">RSS feed with last updated plugins</a> in our RSS reader). And it would be so handy to have RSS feeds to subscribe to, so we can use a RSS reader to be kept up-to-date with the newest and last updated plugins.</p>
+<p>I've created a simple Yahoo Pipe to generate RSS feeds for these pages. The pipe simply scrapes the page and turns the information to a RSS feed. We can subscribe to the following URLs:</p>
+<ul>
+<li><a href="http://feeds.feedburner.com/NewestGrailsPlugins">Newest Plugins as RSS (Feedburner)</a></li>
+<li><a href="http://pipes.yahoo.com/mrhaki/grailspluginsnewest?_render=rss">Newest Plugins as RSS (Yahoo Pipe)</a></li>
+<li><a href="http://feeds.feedburner.com/RecentlyUpdatedGrailsPlugins">Recently Updated Plugins as RSS (Feedburner)</a></li>
+<li><a href="http://pipes.yahoo.com/mrhaki/grailspluginsrecentlyupdated?_render=rss">Recently Updated Plugins as RSS (Yahoo Pipe)</a></li>
+</ul>
+<br />
+<p>The original Yahoo Pipes are also available:</p>
+<ul>
+<li><a href="http://pipes.yahoo.com/mrhaki/grailspluginsnewest">Newest Grails Plugins as Yahoo Pipe</a></li>
+<li><a href="http://pipes.yahoo.com/mrhaki/grailspluginsrecentlyupdated">Recently Updated Plugins as Yahoo Pipe</a></li>
+</ul
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

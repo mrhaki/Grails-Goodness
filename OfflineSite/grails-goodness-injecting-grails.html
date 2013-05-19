@@ -1,0 +1,91 @@
+<html>
+<head>
+
+<title>Grails Goodness: Injecting Grails Services into Spring Beans</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Injecting Grails Services into Spring Beans</h3>
+
+<div class="post">
+<p>One of the underlying frameworks of Grails is Spring. A lot of the Grails components are Spring beans and they all live in the Spring application context. Every Grails service we create is also a Spring bean and in this blog post we see how we can inject a Grails service into a Spring bean we have written ourselves.</p><p>The following code sample shows a simple Grails service we will inject into a Spring bean:</p><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/sample/LanguageService.groovy
+package com.mrhaki.sample
+
+class LanguageService {
+
+    List&lt;String&gt; languages() {
+        ['Groovy', 'Java', 'Clojure', 'Scala']
+    }
+
+}
+</pre><p>We only have one method, <code>languages()</code>, that returns a list of JVM languages. Next we create a new Groovy class in the <code>src/groovy</code> directory which will be our Spring bean that will have the <code>LanguageService</code> injected. We use Spring annotations to make sure our class turns into a Spring bean. With the <code>@Component</code> we indicate the component as a Spring bean. We use the <code>@Autowired</code> annotation to inject the Grails service via the constructor:</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/sample/bean/Shorten.groovy
+package com.mrhaki.sample.bean
+
+import com.mrhaki.sample.LanguageService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+@Component
+class Shorten {
+
+    private final LanguageService languageService
+
+    @Autowired
+    Shorten(final LanguageService languageService) {
+        this.languageService = languageService
+    }
+
+    List&lt;String&gt; firstLetter() {
+        final List&lt;String&gt; languages = languageService.languages()
+        languages.collect { it[0] }
+    }
+}
+</pre><p>The <code>Shorten</code> class will use the list of JVM languages from the <code>LanguageService</code> and return the first letter of each language in the <code>firstLetter()</code> method.</p><p>We can instruct Spring to do package scanning and look for Spring beans in for example <code>resources.groovy</code>, but in <code>Config.groovy</code> we can also set the property <code>grails.spring.bean.packages</code>. We define a list of packages for this property and Grails will scan those packages and add any Spring beans to the Spring context. The complete definition in <code>Config.groovy</code> is now:</p><pre class="brush:groovy">...
+// packages to include in Spring bean scanning
+grails.spring.bean.packages = ['com.mrhaki.sample.bean']
+...
+</pre><p>With the following integration test we can see the <code>Shorten</code> class is now a Spring bean and we can invoke the <code>firstLetter()</code> method that uses the Grails service <code>LanguageService</code>:</p><pre class="brush:groovy">// File: test/integration/com/mrhaki/sample/SpringBeanTests.groovy
+package com.mrhaki.sample
+
+import com.mrhaki.sample.bean.Shorten
+
+public class SpringBeansTests extends GroovyTestCase {
+
+    Shorten shorten
+
+    void testShorten() {
+        assertEquals(['G', 'J', 'C', 'S'], shorten.firstLetter())
+    }
+
+}
+</pre><p>Written with Grails 2.2.1</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<html>
+<head>
+
+<title>Grails Goodness: The Link Namespace</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: The Link Namespace</h3>
+
+<div class="post">
+<p>Grails supports named URL mappings. We can define a name for a URL mapping and use that name when we generate links in our application. In this post we see how we can use the link namespace to use a named mapping.</p>
+<p>We start with a simple named URL mapping for viewing product details on our site:</p>
+<pre class="brush:groovy">
+// File: grails-app/conf/UrlMappings.groovy
+...
+name productDetails: "/product/details/$ref" {
+    controller: 'product'
+    action: 'details'
+}
+...
+</pre>
+<p>We can use the <code>&lt;g:link mapping="..." .../&gt;</code> tag in our code to use this named URL mapping:</p>
+<pre class="brush:html">
+&lt;%-- Sample GSP --%&gt;
+
+&lt;g:link mapping="productDetails" params="[ref: product.identifier]" class="nav"&gt;Details&lt;/g:link&gt; 
+outputs for product with identifier '901':
+&lt;a href="/context/product/details/901" class="nav"&gt;Details&lt;/a&gt;
+</pre>
+<p><strong>But</strong> we can also use the special link namespace in our code. We start a new tag with <code>link</code> as namespace. The name of the tag is the name of the URL mapping we have created. The attributes we specify are all converted to parameters for the link. If we add the <code>attrs</code> attribute we can specify attribute key/value pairs that need to be applied to the generated link as is.</p>
+<pre class="brush:html">
+&lt;%-- Sample GSP --%&gt;
+
+&lt;link:productDetails ref="${product.identifier}" attrs="[class: 'nav']"&gt;Details&lt;/link:productDetails&gt; 
+outputs for product with identifier '901':
+&lt;a href="/context/product/details/901" class="nav"&gt;Details&lt;/a&gt;
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

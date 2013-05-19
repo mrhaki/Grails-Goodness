@@ -1,0 +1,72 @@
+<html>
+<head>
+
+<title>Grails Goodness: One WAR to Rule Them All (Part 3)</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: One WAR to Rule Them All (Part 3)</h3>
+
+<div class="post">
+<p>In <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-one-war-to-rule-them.html">part 1</a> we learned how we can define environment specific configuration in our application code. In <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-one-war-to-rule-them_04.html">part 2</a> we moved some of the configuration outside the application code and into external configuration files. The goal is to have a single WAR file that can be deployed to several environments and still contains configuration properties per environment. We use <code>$ grails war</code> to create the WAR file and if we deploy this WAR file to for example Tomcat we see the display name of our Grails application is set to <em>/sample-production-0.1</em>:</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/_-vJw6r2W-bw/TUu1WuJmUWI/AAAAAAAAEbI/HCZo6Vkvklg/s1600/tomcat-manager.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="233" width="320" src="http://2.bp.blogspot.com/_-vJw6r2W-bw/TUu1WuJmUWI/AAAAAAAAEbI/HCZo6Vkvklg/s320/tomcat-manager.png" /></a></div>
+
+<p>The name consists of our application name, environment used to create the WAR file (by default Grails uses production when creating a WAR file) and the application version. Grails automatically sets this value when we package the application as WAR file. It can be confusing to see the environment <em>production</em> in the display name, so we set the value of the display name to a another value.</p>
+<p>We first get the template <code>web.xml</code> Grails uses and set the value of <code>display-name</code> to a new value.</p>
+<pre class="brush:plain;light:true">
+$ grails install-templates
+</pre>
+<p>We open <code>src/templates/war/web.xml</code> and look for the <code>display-name</code> element. The value is <em>/@grails.project.key@</em>. Grails uses the ANT replace task when building the WAR file to replace <em>@grails.project.key@</em> with application name, environment and application version. We want a custom value so we change the <code>display-name</code>:</p>
+<pre class="brush:xml">
+...
+
+&lt;display-name&gt;Sample Application :: @grails.app.name.version@&lt;/display-name&gt;
+
+...
+</pre>
+<p>We use the @...@ syntax, because we will use the ANT replace task, to add the application name and version to the generated <code>web.xml</code>. Next we create <code>scripts/_Events.groovy</code> and listen to the <em>WebXmlStart</em> event. Here we get a hold on the <code>web.xml</code> and use the ANT replace task to inject the application name and version.</p>
+<pre class="brush:groovy">
+// File: scripts/_Events.groovy
+eventWebXmlStart = { webXmlFile -&gt;
+    ant.echo message: "Change display-name for web.xml"
+    def tmpWebXmlFile = new File(projectWorkDir, webXmlFile)
+    ant.replace(file: tmpWebXmlFile, token: "@grails.app.name.version@",
+                value: "${grailsAppName}-${grailsAppVersion}")
+}
+</pre>
+<p>We are ready to create the WAR file (<code>$ grails war</code>) and deploy it to our Tomcat instance. If we look at the display name we see our custom display name <em>Sample Application:: sample-0.1</em>:</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUu-dhAZlmI/AAAAAAAAEbQ/hR2HMJzuWew/s1600/tomcat-manager2.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="220" width="320" src="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUu-dhAZlmI/AAAAAAAAEbQ/hR2HMJzuWew/s320/tomcat-manager2.png" /></a></div
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<html>
+<head>
+
+<title>Grails Goodness: Render GSP Views And Templates Outside Controllers</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Render GSP Views And Templates Outside Controllers</h3>
+
+<div class="post">
+<p>In a Grails application we use Groovy Server Pages (GSP) views and templates to create content we want to display in the web browser. Since Grails 2 we can use the <code>groovyPageRenderer</code> instance to render GSP views and templates outside a controller. For example we can render content in a service or other classes outside the scope of a web request.<br />
+</p><p>The <code>groovyPageRenderer</code> instance is of type <code>grails.gsp.PageRenderer</code> and has a <code>render()</code> method like we use in a controller. We can pass a view or template name together with a model of data to be used in the GSP. The result is a <code>String</code> value.<br />
+The class also contains a <code>renderTo()</code> method that can be used to generate output to a <code>Writer</code> object. For example we can generate files with the output of the GSP rendering by passing a <code>FileWriter</code> instance to this method.</p><p>In the following sample we create a GSP view <em>confirm.gsp</em> and a GSP template <em>_welcome.gsp</em>. We also create a Grails service with two methods to use the GSP view and template.</p><pre class="brush:html">%{-- File: grails-app/views/email/_welcome.gsp --}%
+Hi, ${username}
+</pre><pre class="brush:html">%{-- File: grails-app/views/email/confirm.gsp --}%
+&lt;!doctype html&gt;
+&lt;head&gt;
+    &lt;title&gt;Confirmation&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+&lt;h2&gt;&lt;g:render template="/email/welcome" model="[username: username]"/&gt;&lt;/h2&gt;
+
+&lt;p&gt;
+    Thank you for your registration.
+&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</pre><pre class="brush:groovy">// File: grails-app/services/page/renderer/RenderService.groovy
+package page.renderer
+
+import grails.gsp.PageRenderer
+
+class RenderService {
+
+    /**
+     * Use the variable name groovyPageRenderer to enable
+     * automatic Spring bean binding. Notice the variable
+     * starts with groovy..., could be cause of confusing because
+     * the type is PageRenderer without prefix Groovy....
+     */
+    PageRenderer groovyPageRenderer
+
+    String createConfirmMessage() {
+        groovyPageRenderer.render view: '/email/confirm', model: [username: findUsername()]
+    }
+
+    String createWelcomeMessage() {
+        groovyPageRenderer.render template: '/email/welcome', model: [username: findUsername()]
+    }
+
+    private String findUsername() {
+        // Lookup username, for this example we return a
+        // simple String value.
+        'mrhaki'
+    }
+}
+</pre><p>Next we create a integration test to see if our content is rendered correctly:</p><pre class="brush:groovy">// File: test/integration/page/renderer/RenderOutputTests.groovy
+package page.renderer
+
+import org.junit.Assert
+import org.junit.Test
+
+class RenderOutputTests {
+
+    RenderService renderService
+
+    @Test
+    void welcomeMessage() {
+        Assert.assertEquals 'Hi, mrhaki', renderService.createWelcomeMessage().trim()
+    }
+
+    @Test
+    void confirmMessage() {
+        final String expectedOutput = '''
+        &lt;!doctype html&gt;
+        &lt;head&gt;
+            &lt;title&gt;Confirmation&lt;/title&gt;
+        &lt;/head&gt;
+
+        &lt;body&gt;
+
+        &lt;h2&gt;
+        Hi, mrhaki&lt;/h2&gt;
+
+        &lt;p&gt;
+            Thank you for your registration.
+        &lt;/p&gt;
+
+        &lt;/body&gt;
+        &lt;/html&gt;'''
+
+        Assert.assertEquals expectedOutput.stripIndent(), renderService.createConfirmMessage()
+    }
+}
+</pre><p>We can run our test and everything is okay:</p><pre class="brush:shell">$ grails test-app RenderOutputTests
+| Completed 2 integration tests, 0 failed in 1051ms
+| Tests PASSED - view reports in target/test-reports
+</pre><p>We can use tags from tag libraries in our GSP views and templates. The Sitemesh layouts cannot be used. The <code>PageRenderer</code> works outside of the request scope, which is necessary for the Sitemesh layouts. Because we are outside of the web request scope we cannot generate absolute links in the GSP view directly. If we change the confirm GSP view and add a tag to create an absolute link we get an <code>UnsupportedOperationExeption</code> with the message <em>You cannot read the server port in non-request rendering operations</em>.</p><pre class="brush:html">%{-- File: grails-app/views/email/confirm.gsp --}%
+&lt;!doctype html&gt;
+&lt;head&gt;
+    &lt;title&gt;Confirmation&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+&lt;h2&gt;&lt;g:render template="/email/welcome" model="[username: username]"/&gt;&lt;/h2&gt;
+
+&lt;p&gt;
+    Thank you for your registration.
+&lt;/p&gt;
+
+&lt;p&gt;
+    To use the application can you directly go to the
+    &lt;g:link absolute="true" controller="index"&gt;home page&lt;/g:link&gt;.
+&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</pre><p>But we can simply workaround this issue. Remember that since Grails 2 we can use the <a href="http://mrhaki.blogspot.com/2012/01/grails-goodness-generate-links-outside.html"><code>grailsLinkGenerator</code></a> to generate links in for example a service. So we create our absolute link with the <code>grailsLinkGenerator</code> and pass it as a model attribute to our GPS view.</p><pre class="brush:groovy">package page.renderer
+
+import grails.gsp.PageRenderer
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+
+class RenderService {
+
+    PageRenderer groovyPageRenderer
+
+    LinkGenerator grailsLinkGenerator
+
+    String createConfirmMessage() {
+        final String homePageLink = grailsLinkGenerator.link(controller: 'index', absolute: true)
+        groovyPageRenderer.render(view: '/email/confirm', model: [link: homePageLink, username: findUsername()])
+    }
+
+    String createWelcomeMessage() {
+        groovyPageRenderer.render template: '/email/welcome', model: [username: findUsername()]
+    }
+
+    private String findUsername() {
+        // Lookup username, for this example we return a
+        // simple String value.
+        'mrhaki'
+    }
+}
+</pre><pre class="brush:html">%{-- File: grails-app/views/email/confirm.gsp --}%
+&lt;!doctype html&gt;
+&lt;head&gt;
+    &lt;title&gt;Confirmation&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+&lt;h2&gt;&lt;g:render template="/email/welcome" model="[username: username]"/&gt;&lt;/h2&gt;
+
+&lt;p&gt;
+    Thank you for your registration.
+&lt;/p&gt;
+
+&lt;p&gt;
+    To use the application can you directly go to the
+    &lt;a href="${link}"&gt;home page&lt;/a&gt;.
+&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

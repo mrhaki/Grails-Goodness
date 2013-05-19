@@ -1,0 +1,101 @@
+<html>
+<head>
+
+<title>Grails Goodness: One WAR to Rule Them All (Part 2)</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: One WAR to Rule Them All (Part 2)</h3>
+
+<div class="post">
+<p>In a <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-one-war-to-rule-them.html">previous post</a> we learned how easy it is to have just one WAR with different configuration settings for different environments. All configuration settings are part of the application code and if we want to change a value we must rebuild the WAR file again. But what if we want to set configuration options for different environments outside of the application code? So if we want to set a configuration property for a specific environment we don't have to rebuild the WAR file? In this post we learn how to achieve this for a Grails application.</p>
+<p>In Grails we can add extra configuration files by setting the <code>grails.config.locations</code> property in <code>grails-app/conf/Config.groovy</code>. We can assign a list of files available in the classpath or file system. Besides Groovy configuration scripts we can also define plain old Java property files. If we start with a new fresh Grails application we can see at the top of <code>grails-app/conf/Config.groovy</code> the code for this functionality in a comment block. To define the location of our environment specific configuration file per application server we read in the file location from a system property value. So we leave the placement of the configuration file up to the administrators of the application server, because we don't want to hard-code the file location in our application code. At the top of the <code>grails-app/conf/Config.groovy</code> file we set the value of <code>grails.config.locations</code>:</p>
+<pre class="brush:groovy;">
+// File: grails-app/conf/Config.groovy
+def CONFIG_LOCATION_SYS_PROPERTY = 'sample.app.config.file'
+if (System.properties[CONFIG_LOCATION_SYS_PROPERTY]) {
+    grails.config.locations = ["file:" + System.properties[CONFIG_LOCATION_SYS_PROPERTY]]
+}
+
+...
+</pre>
+<p>We change our index view and add extra code to show the value of a new configuration property: <code>nodeName</code>. The value for this property needs to be defined in the configuration file we assign via the system property <code>sample.app.config.location</code>.</p>
+
+<pre class="brush:html;highlight:[7]">
+&lt;%-- File: grails-app/views/index.gsp --%&gt;
+
+...
+
+&lt;h1&gt;Application Status&lt;/h1&gt;
+&lt;ul&gt;
+    &lt;li&gt;Running mode: ${grailsApplication.config.runningMode}&lt;/li&gt;
+    &lt;li&gt;Node: ${grailsApplication.config.nodeName}&lt;/li&gt;
+    &lt;li&gt;App version: &lt;g:meta name="app.version"&gt;&lt;/g:meta&gt;&lt;/li&gt;
+    &lt;li&gt;Grails version: &lt;g:meta name="app.grails.version"&gt;&lt;/g:meta&gt;&lt;/li&gt;
+    &lt;li&gt;Groovy version: ${org.codehaus.groovy.runtime.InvokerHelper.getVersion()}&lt;/li&gt;
+    &lt;li&gt;JVM version: ${System.getProperty('java.version')}&lt;/li&gt;
+    &lt;li&gt;Controllers: ${grailsApplication.controllerClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Domains: ${grailsApplication.domainClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Services: ${grailsApplication.serviceClasses.size()}&lt;/li&gt;
+    &lt;li&gt;Tag Libraries: ${grailsApplication.tagLibClasses.size()}&lt;/li&gt;
+&lt;/ul&gt;
+
+...
+</pre>
+<p>Our application code changes are done and we can package the application as WAR file:</p>
+<pre class="brush:plain;light:true">
+$ grails war
+</pre>
+<p>Next we create a Groovy script which sets the property <code>nodeName</code>. For each application server or environment we create a file. For example we create a file <code>sample-config.groovy</code> for the system test Tomcat instance of our previous post:</p>
+<pre class="brush:groovy;">
+// File sample-config.groovy
+nodeName = 'System Test'
+</pre>
+<p>Before we start our application servers we must set the system property <code>sample.app.config.file</code>. We must reference our Groovy script which set the <code>nodeName</code> property.</p>
+<pre class="brush:plain;light:true">
+$ export CATALINA_OPTS="-Dsample.app.config.file=sample-config.groovy"
+</pre>
+<p>After we have defined the correct value we can install our single WAR file to the three Tomcat instances and start them. If we then open the index page of our application we can see in the left column the value or our configuration property <em>nodeName</em>:</p>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUuq4Gzb2II/AAAAAAAAEao/qN3G5oki_qw/s1600/grails-st.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="164" width="195" src="http://1.bp.blogspot.com/_-vJw6r2W-bw/TUuq4Gzb2II/AAAAAAAAEao/qN3G5oki_qw/s320/grails-st.png" /></a></div>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://2.bp.blogspot.com/_-vJw6r2W-bw/TUuq4eXDaRI/AAAAAAAAEaw/yl-YSeIoYgI/s1600/grails-uat.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="178" width="198" src="http://2.bp.blogspot.com/_-vJw6r2W-bw/TUuq4eXDaRI/AAAAAAAAEaw/yl-YSeIoYgI/s320/grails-uat.png" /></a></div>
+
+<div class="separator" style="clear: both; text-align: center;">
+<a href="http://3.bp.blogspot.com/_-vJw6r2W-bw/TUuq49xaX3I/AAAAAAAAEa4/uEObWTJ63DE/s1600/grails-prod.png" imageanchor="1" style="margin-left:1em; margin-right:1em"><img border="0" height="166" width="155" src="http://3.bp.blogspot.com/_-vJw6r2W-bw/TUuq49xaX3I/AAAAAAAAEa4/uEObWTJ63DE/s320/grails-prod.png" /></a></div>
+
+<p>We see the correct value for each environment. Grails has built-in support for adding external configuration files to the application configuration. This makes it very easy to set configuration properties for separate environments and their values can be changed without building a new WAR file.</p>
+
+<p>In the <a href="http://mrhaki.blogspot.com/2011/02/grails-goodness-one-war-to-rule-them_4229.html">following post</a> we learn how to change the display name in the <code>web.xml</code> containing the application name and version.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

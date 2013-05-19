@@ -1,0 +1,62 @@
+<html>
+<head>
+
+<title>Grails Goodness: Testing for Chain Result in Controller</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Testing for Chain Result in Controller</h3>
+
+<div class="post">
+<p>Testing a controller in Grails in easy with the <code>ControllerUnitTestCase</code>. If we extend our test class from the <code>ControllerUnitTestCase</code> we get a lot of extra functionality to write our tests. For example the controller is extended with a parameters map so we can set parameter values in our test case.  Suppose we the following controller and want to test it:</p>
+<pre class="brush:groovy">
+class SimpleController {
+    def hello = {
+        chain action: 'world', controller: 'other', model: [message: new Expando(text: params.msg)]
+    }
+}
+</pre>
+<p>By extending the <code>ControllerUnitTestCase</code> the <code>mockController(SimpleController)</code> method is invoked. This will add (among other things) the map <code>chainArgs</code> to the controller. The map is filled with the attributes of our <code>chain()</code> method. And we can use this map in our test to check for correct results:</p>
+<pre class="brush:groovy">
+class SimpleControllerTests extends grails.test.ControllerUnitTestCase {
+    void setUp() { super.setUp() }
+
+    void testHelloAction() {
+        controller.params.msg = 'Hello world'
+        controller.hello()
+        assertTrue 'world', controller.chainArgs.action
+        assertTrue 'other', controller.chainArgs.controller
+        assertTrue 'Hello world', controller.chainArgs.model.message.text
+    }
+}
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

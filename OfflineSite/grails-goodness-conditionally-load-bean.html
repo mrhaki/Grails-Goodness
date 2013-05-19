@@ -1,0 +1,98 @@
+<html>
+<head>
+
+<title>Grails Goodness: Conditionally Load Bean Definitions from resources.groovy</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Conditionally Load Bean Definitions from resources.groovy</h3>
+
+<div class="post">
+<p>We can define new bean definitions in several ways with Grails. One of them is via the <code>grails-app/conf/spring/resources.groovy</code> file. This file is parsed and bean definitions are added to the Spring application context. The good thing is we can add Groovy code to this file to conditionally load bean definitions.</p><p>First we specify different bean definitions for different environments. Grails already has a development, test and production environment, but we can also use a custom environment. In the following sample we set the property of the <code>Sample</code> bean based on the environment the application is running in. We use the method <code>Environment.executeForEnviroment()</code> where we can use a DSL to indicate the name of the environment and the code we want to execute for that environment. First the code for the <code>Sample</code> class:</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/grails/Sample.groovy
+package com.mrhaki.grails
+
+class Sample {
+    String environment
+}
+</pre><p>Next we change the <code>resources.groovy</code> file and set the property <code>environment</code> to a different value for each environment:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.grails.Sample
+import grails.util.Environment
+
+beans = {
+    // Define bean with default value for property environment.
+    // Bean definition is overridden in Environment.executeForCurrentEnvironment block.
+    sample(Sample) {
+        environment = 'default'
+    }
+
+    Environment.executeForCurrentEnvironment {
+        // Override bean definition in 'development' mode.
+        development {
+            sample(Sample) {
+                environment = 'Development'
+            }
+        }
+
+        // Override bean definition for custom environment 'mrhaki'.
+        // Start grails with -Dgrails.env=mrhaki to enable this environment.
+        mrhaki {
+            sample(Sample) {
+                environment = 'Custom mrhaki'
+            }
+        }
+
+    }
+}
+</pre><p>We can also use configuration properties to conditionally load bean definitions. In our <code>resources.groovy</code> the <code>grailsApplication</code> object is automatically injected. We can use this variable and get to the configuration properties. So we can define a configuration property in our <code>grails-app/conf/Config.groovy</code> file and use the value in <code>resources.groovy</code> in a condition to load a bean definition.</p><p>Let's add a new boolean property to our configuration <code>sample.load</code> and use it in our <code>resources.groovy</code>:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+
+sample.load = true
+
+...
+</pre><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.grails.Sample
+
+beans = {
+    // Define bean with default value for property environment.
+    // Bean definition is overridden in Environment.executeForCurrentEnvironment block.
+    sample(Sample) {
+        environment = 'default'
+    }
+
+    if (grailsApplication.config.sample.load) {
+        sample(Sample) {
+            environment = 'Set by configuration'
+        }
+    }
+}
+</pre><p>We could have achieved the same thing in this samples with <a href="http://grails.org/doc/latest/guide/spring.html#propertyOverrideConfiguration">changing bean properties via configuration</a>, because in the sample we only change the property value. But we can do much more than simply change property values and for example load extra beans conditionally based on the Grails environment or a configuration property, which we cannot do with just changing properties via configuration.</p><p>Code written with Grails 2.2.1</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>
