@@ -1,0 +1,62 @@
+<html>
+<head>
+
+<title>Grails Goodness: Register Custom Marshaller Using ObjectMarshallerRegisterer</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Register Custom Marshaller Using ObjectMarshallerRegisterer</h3>
+
+<div class="post">
+<p>When we convert data to JSON or XML (or any other format actually) in our Grails application we can register custom marshallers. These marshallers must contain the logic to convert an input object to a given format. For example we could have a book class and we want to convert it to our own JSON format. We have different options in Grails to achieve this, but for now we will create a custom marshaller class <code>CustomBookMarshaller</code>. This class must implement the <code>ObjectMarshaller&lt;C&gt;</code> interface. The generic type is the converter the marshaller is for and is in most cases either <code>grails.converters.XML</code> or <code>grails.converters.JSON</code>. Next we must make sure Grails uses our custom marshaller and we must register it. In <a href="http://grails.org/doc/latest/guide/webServices.html#objectMarshallers">the Grails documentation</a> is explained how to do this via <code>grails-app/conf/Bootstrap.groovy</code> where we invoke for example <code>JSON.registerMarshaller(new CustomBookMarshaller())</code>. Or via <code>grails-app/conf/spring/resources.groovy</code> where we must write an extra component with a method annotated <code>@PostConstruct</code> where <code>JSON.registerMarshaller(new CustomBookMarshaller())</code> is invoked.</p><p>But there is also another way using <code>org.codehaus.groovy.grails.web.converters.configuration.ObjectMarshallerRegisterer</code>. This is a Spring bean just for configuring extra marshallers. The bean has a <code>priority</code> property we can use to define the priority for this marshaller. Grails will use a marshaller with the highest priority if for the same class multiple marshallers are defined. We can assign a marshaller to the <code>marshaller</code> property. And finally we must set the converter class, for example <code>grails.converters.XML</code> or <code>grails.converters.JSON</code> with the <code>converter</code> property.</p><p>In our <code>grails-app/conf/spring/resources.groovy</code> file we define a new instance of <code>ObjectMarshallerRegisterer</code> and assign the appropriate property values. The name of the bean in <code>resources.groovy</code> is not important, but we must make sure there is no name class with other Spring configured beans. Grails looks for all beans of type <code>ObjectMarshallerRegisterer</code> during marshaller configuration and use the information we provide.</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.json.CustomBookMarshaller
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.converters.configuration.ObjectMarshallerRegisterer
+
+beans = {
+
+    // The name is not important. The type is picked up 
+    // by Grails and must be ObjectMarshallerRegisterer.
+    customBookJsonMarshaller(ObjectMarshallerRegisterer) {
+        // Assign custom marshaller instance.
+        marshaller = new CustomBookMarshaller()
+
+        // Set converter class type.
+        converterClass = JSON
+
+        // Optional set priority. Default value is 0.
+        priority = 1
+    }
+
+}
+</pre><p>Code written with Grails 2.3.2</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

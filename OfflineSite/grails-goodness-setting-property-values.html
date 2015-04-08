@@ -1,0 +1,94 @@
+<html>
+<head>
+
+<title>Grails Goodness: Setting Property Values through Configuration</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Setting Property Values through Configuration</h3>
+
+<div class="post">
+<p>In Grails we can define properties for services, controller, taglibs, Spring components and other components in the Spring application context through configuration. This is called property overriding in Spring terminology. This feature is very useful to define or override property values on components in the application context. We can define the property values in a <code>beans{}</code> block in <code>Config.groovy</code>. We can also load external configuration files, like property files and define property values in those.</p><p>With property overriding we don't have to look for property values via an injected <code>GrailsApplication</code> object and the <code>config</code> property of <code>GrailsApplication</code>. The code using the property value is now much cleaner and easier to test.</p><p>In the following sample configuration we override a <code>message</code> property value for the <code>SampleService</code>, the controller <code>SampleController</code>, tag library <code>SampleTagLib</code> and a Spring component <code>MessageProvider</code>:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+import com.mrhaki.grails.conf.*
+
+import com.mrhaki.grails.conf.SampleTagLib as STL
+
+...
+beans {
+    // Grails service.
+    sampleService {
+        message = 'Value for com.mrhaki.grails.conf.SampleService'
+    }
+
+    // A controller class is defined as Spring bean with
+    // the name of the class including the package.
+    "${SampleController.canonicalName}" {
+        message = 'Value for com.mrhaki.grails.conf.SampleController'
+    }
+
+    // A tag library class is defined as Spring component where
+    // the name is the class name including the package.
+    "${STL.canonicalName}" {
+        message = 'Value for com.mrhaki.grails.conf.SampleTagLib'
+    }
+
+    // Spring bean. Can be configured for example in 
+    // grails-app/conf/resources.groovy as:
+    // beans = { 
+    //     messageProvider(com.mrhaki.grails.conf.MessageProvider)
+    // }
+    messageProvider {
+        message = 'Value for com.mrhaki.grails.conf.MessageProvider'
+    }
+...
+</pre><p>The information can also be included in an externalized configuration file. In the following <code>Config.groovy</code> we load the the file <code>beans-config.properties</code> to set the value of the <code>message</code> property.</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+grails.config.locations = ['classpath:beans-config.properties']
+...
+</pre><p>The property file has the following content:</p><pre class="brush:plain"># File: src/java/beans-config.properties
+beans.sampleService.message = Value for com.mrhaki.grails.conf.SampleService
+beans.com.mrhaki.grails.conf.SampleController.message = Value for com.mrhaki.grails.conf.SampleController
+beans.com.mrhaki.grails.conf.SampleTagLib.message = Value for com.mrhaki.grails.conf.SampleTagLib
+beans.messageProvider.message = Value for com.mrhaki.grails.conf.MessageProvider
+</pre><p>The following code sample shows the implementation of the Grails service <code>SampleService</code> to see how we define the property and use the value defined in the configuration:</p><pre class="brush:groovy">// File: grails-app/service/com/mrhaki/grails/conf/SampleService.groovy
+package com.mrhaki.grails.conf
+
+class SampleService {
+
+    String message
+
+    String tell() {
+        "I want to tell you $message"
+    }
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<html>
+<head>
+
+<title>Grails Goodness: Enable Accept Header for User Agent Requests</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Enable Accept Header for User Agent Requests</h3>
+
+<div class="post">
+<p>Especially when we use Grails to create a RESTful API we want to enable the request header <code>Accept</code>, so Grails can do content negotiation based on the value in the header. For example we could use the request header <code>Accept: application/json</code> to get a JSON response. Grails will look at the <code>boolean</code> configuration property <code>grails.mime.use.accept.header</code> to see if the <code>Accept</code> header must be parsed. The default value is <code>true</code> so the <code>Accept</code> header is used. But there is another property which determines if the <code>Accept</code> header is used: <code>grails.mime.disable.accept.header.userAgents</code>. The value must contain a list or a regular expression pattern of user agents which are ignored for the <code>Accept</code> header. The default value is <code>~/(Gecko(?i)|WebKit(?i)|Presto(?i)|Trident(?i))/</code>. So for any request from these user agents, mostly our web browser, the <code>Accept</code> header is ignored.</p><p>If we use REST web services test tools from our browser, for example Postman, then any <code>Accept</code> header we set in the tool is ignored by Grails. We must change the value of the configuration property <code>grails.mime.disable.accept.header.userAgents</code> to for example an empty list. Then we know for every request send to our Grails application, either from a web browser or command-line tool like curl, the <code>Accept</code> header is interpreted by Grails.</p><p>The following sample shows how we make sure the <code>Accept</code> header is always used:</p><pre class="brush:groovy">// File: grails-app/conf/Config.groovy
+...
+grails.mime.use.accept.header = true // Default value is true.
+grails.mime.disable.accept.header.userAgents = []
+...
+</pre><p>Written with Grails 2.4.1.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

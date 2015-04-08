@@ -89,7 +89,9 @@ class ItemsViewSpecification extends Specification {
         final String output = renderViewWithItems(['one'])
 
         then:
-        output.contains '<li>one</li>'
+        output.contains '
+<li>one</li>
+'
     }
 
     def "if collection of items is empty then show message items are empty"() {
@@ -104,7 +106,7 @@ class ItemsViewSpecification extends Specification {
     }
 
     private renderViewWithItems(items = []) {
-        render(view: '/sample/user', model: [items: items])
+        render(view: '/sample/items', model: [items: items])
     }
 
 }

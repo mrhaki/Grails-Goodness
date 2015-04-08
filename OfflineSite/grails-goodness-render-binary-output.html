@@ -1,0 +1,90 @@
+<html>
+<head>
+
+<title>Grails Goodness: Render Binary Output with the File Attribute</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Render Binary Output with the File Attribute</h3>
+
+<div class="post">
+<p>Since Grails 2 we can render binary output with the <code>render()</code> method and the <code>file</code> attribute. The <code>file</code> attribute can be assigned a <code>byte[]</code>, <code>File</code>, <code>InputStream</code> or <code>String</code> value. Grails will try to determine the content type for files, but we can also use the <code>contentType</code> attribute to set the content type.</p><p>In the following controller we find an image in our application using <code>grailsResourceLocator</code>. Then we use the <code>render()</code> method and the <code>file</code> and <code>contenType</code> attributes to render the image in a browser:</p><pre class="brush:groovy;highlight:[11]">package com.mrhaki.render
+
+import org.codehaus.groovy.grails.core.io.ResourceLocator
+import org.springframework.core.io.Resource
+
+class ImageController {
+
+    ResourceLocator grailsResourceLocator
+
+    def index() {
+        final Resource image = grailsResourceLocator.findResourceForURI('/images/grails_logo.png')
+        render file: image.inputStream, contentType: 'image/png' 
+    }
+    
+}
+</pre><p>The following screenshots shows the output of the <code>index()</code> action in a web browser:</p><br />
+<div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-TpnLr19xRyg/Uih7HunCNQI/AAAAAAAAHVU/V36yRo01B1g/s1600/Screen+Shot+2013-09-05+at+14.36.45+.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-TpnLr19xRyg/Uih7HunCNQI/AAAAAAAAHVU/V36yRo01B1g/s1600/Screen+Shot+2013-09-05+at+14.36.45+.png" /></a></div><br />
+<p>We can use the <code>fileName</code> attribute to set a filename for the binary content. This will also set a response header with the name <code>Content-Disposition</code> with a the filename as value. Most browser will then automatically download the binary content, so it can be saved on disk. Grails will try to find the content type based on the extension of the filename. A map of extensions and content type values is defined in the <code>grails-app/conf/Config.groovy</code> configuration file. We can add for example for <code>png</code> a new key/value pair:</p><pre class="brush:groovy;highlight:[3]">...
+grails.mime.types = [
+    all:           '*/*',
+    png:           'image/png',
+    atom:          'application/atom+xml',
+    css:           'text/css',
+    csv:           'text/csv',
+    form:          'application/x-www-form-urlencoded',
+    html:          ['text/html','application/xhtml+xml'],
+    js:            'text/javascript',
+    json:          ['application/json', 'text/json'],
+    multipartForm: 'multipart/form-data',
+    rss:           'application/rss+xml',
+    text:          'text/plain',
+    xml:           ['text/xml', 'application/xml']
+]
+...
+</pre><p>In our controller we can change the code so we use the <code>fileName</code> attribute:</p><pre class="brush:groovy;highlight:[11]">package com.mrhaki.render
+
+import org.codehaus.groovy.grails.core.io.ResourceLocator
+import org.springframework.core.io.Resource
+
+class ImageController {
+
+    ResourceLocator grailsResourceLocator
+
+    def index() {
+        final Resource image = grailsResourceLocator.findResourceForURI('/images/grails_logo.png')
+        render file: image.inputStream, fileName: 'logo.png' 
+    }
+    
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

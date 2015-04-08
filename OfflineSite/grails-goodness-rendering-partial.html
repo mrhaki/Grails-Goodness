@@ -1,0 +1,156 @@
+<html>
+<head>
+
+<title>Grails Goodness: Rendering Partial RESTful Responses</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Rendering Partial RESTful Responses</h3>
+
+<div class="post">
+<p>Grails 2.3 added a lot of support for RESTful services. For example we can now use a <code>respond()</code> method in our controllers to automatically render resources. The <code>respond()</code> method accepts a resource instance as argument and a map of attributes that can be passed. We can use the <code>includes</code> and <code>excludes</code> keys of the map to pass which fields of our resources need to be included or excluded in the response. This way we can render partial responses based on a request parameter value.</p><p>First we start with a simple domain class <code>Book</code>:</p><pre class="brush:groovy">// File: grails-app/domain/com/mrhaki/grails/rest/Book.groovy
+package com.mrhaki.grails.rest
+
+class Book {
+
+    String title
+    String isbn
+    int numberOfPages
+
+}
+</pre><p>Next we create a controller <code>BookApiController</code>, which we extend from the <code>RestfulController</code> so we already get a lot of basic functionality to render an instance of <code>Book</code>. We overwrite the <code>index()</code> and <code>show()</code> methods, because these are used to display our resource. We use the request parameter <code>fields</code> to define a comma separated list of fields and pass it to the <code>includes</code> attribute of the map we use with the <code>respond()</code> method. Notice we also set the <code>excludes</code> attribute to remove the <code>class</code> property from the output.</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/rest/BookApiController.groovy
+package com.mrhaki.grails.rest
+
+import grails.rest.RestfulController
+
+class BookApiController extends RestfulController&lt;Book&gt; {
+
+    // We support both JSON and XML.
+    static responseFormats = ['json', 'xml']
+
+    BookApiController() {
+        super(Book)
+    }
+
+    @Override
+    def show() {
+        // We pass which fields to be rendered with the includes attributes,
+        // we exclude the class property for all responses.
+        respond queryForResource(params.id), [includes: includeFields, excludes: ['class']]
+    }
+
+    @Override
+    def index(final Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+        respond listAllResources(params), [includes: includeFields, excludes: ['class']]
+    }
+
+    private getIncludeFields() {
+        params.fields?.tokenize(',')
+    }
+
+}
+</pre><p>Next we define a mapping to our controller in <code>UrlMappings.groovy</code>:</p><pre class="brush:groovy">// File: grails-app/conf/UrlMappings.groovy
+
+class UrlMappings {
+    static mappings = {
+...
+        "/api/book"(resources: "bookApi")
+...
+    }
+}
+</pre><p>We are now almost done. We only have to register a new Spring component for the collection rendering of our <code>Book</code> resources. This is necessary to allow the usage of the <code>includes</code> and <code>excludes</code> attributes. These attributes are passed to the so-called componentType of the collection. In our case the componentType is the <code>Book</code> class.</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+
+import com.mrhaki.grails.rest.Book
+import grails.rest.render.json.JsonCollectionRenderer
+import grails.rest.render.xml.XmlCollectionRenderer
+
+beans = {
+    // The name of the component is not relevant. 
+    // The constructor argument Book sets the componentType for
+    // the collection renderer.
+    jsonBookCollectionRenderer(JsonCollectionRenderer, Book)
+    xmlBookCollectionRenderer(XmlCollectionRenderer, Book)
+
+    // Uncomment the following to register collection renderers
+    // for all domain classes in the application.
+    // for (domainClass in grailsApplication.domainClasses) {
+    //     "json${domainClass.shortName}CollectionRenderer(JsonCollectionRenderer, domainClass.clazz)
+    //     "xml${domainClass.shortName}CollectionRenderer(XmlCollectionRenderer, domainClass.clazz)
+    // }
+}
+</pre><p>Now it is time to see our partial responses in action using some simple cURL invocations:</p><pre class="brush:plain;light:true">$ curl -X GET -H "Accept:application/json" http://localhost:9000/custom-renderers/api/book?fields=title
+[
+  {
+    "title": "It"
+  },
+  {
+    "title": "The stand"
+  }
+]
+
+$ curl -X GET -H "Accept:application/xml" http://localhost:9000/custom-renderers/api/book?fields=title,isbn
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;list&gt;
+  &lt;book&gt;
+    &lt;isbn&gt;
+      0451169514
+    &lt;/isbn&gt;
+    &lt;title&gt;
+      It
+    &lt;/title&gt;
+  &lt;/book&gt;
+  &lt;book&gt;
+    &lt;isbn&gt;
+      0307743683
+    &lt;/isbn&gt;
+    &lt;title&gt;
+      The stand
+    &lt;/title&gt;
+  &lt;/book&gt;
+&lt;/list&gt;
+
+$ curl -X GET -H "Accept:application/json" http://localhost:9000/custom-renderers/api/book/1
+{
+  "id": 1,
+  "isbn": "0451169514",
+  "numberOfPages": 1104,
+  "title": "It"
+}
+
+$ curl -X GET -H "Accept:application/json" http://localhost:9000/custom-renderers/api/book/1?fields=isbn,id
+{
+  "id": 1,
+  "isbn": "0451169514"
+}
+</pre><p>Code written with Grails 2.3.2</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

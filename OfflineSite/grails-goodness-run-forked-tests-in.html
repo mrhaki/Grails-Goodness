@@ -1,0 +1,41 @@
+<html>
+<head>
+
+<title>Grails Goodness: Run Forked Tests in IntelliJ IDEA</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Run Forked Tests in IntelliJ IDEA</h3>
+
+<div class="post">
+<p>In the latest Grails releases we can execute our tests in so-called forked mode. This means a separate JVM is started with an isolated classpath from the Grails build system. When we want to run our tests in forked mode from within IntelliJ IDEA we get the following error: <code>Error running forked test-app: Could not load grails build listener class (Use --stacktrace to see the full trace)</code>. To make running tests in forked mode work with IntelliJ IDEA we must add one of the IntelliJ IDEA supplied JAR files to the Grails classpath.</p><p>We need to search for the file <code>grails-rt.jar</code> in the directory where we installed IntelliJ IDEA. For example on Mac OSX this would be <code>Applications/IntelliJ IDEA 13.app/plugins/Grails/lib/grails-rt.jar</code>. We need to copy this file to the <code>lib</code> directory of our Grails project. On *nix systems we can actually define a soft link to this location in the <code>lib</code> directory. For example with the following command <code>$ ln -s /Applications/IntelliJ\ IDEA\ 13.app/plugins/Grails/lib/grails-rt.jar lib/intellij-grails-rt.jar</code>.</p><p>Now we can run our Grails forked tests from within IntelliJ IDEA. To debug our tests we must add the option <code>--debug-fork</code> to the <em>Run Configuration</em> of the test.</p><p>We could also disable the forked mode for tests to run them in IntelliJ IDEA. We must then set <code>grails.project.fork.test = false</code> in <code>grails-app/conf/BuildConfig.groovy</code>. In non-forked mode we don't need to copy the file <code>grails-rt.jar</code>.</p><p>Tested with IntelliJ IDEA 13 and Grails 2.3.5.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

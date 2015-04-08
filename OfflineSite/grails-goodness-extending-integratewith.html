@@ -1,0 +1,136 @@
+<html>
+<head>
+
+<title>Grails Goodness: Extending IntegrateWith Command</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Extending IntegrateWith Command</h3>
+
+<div class="post">
+<p>We can extend the <code>integrate-with</code> command in Grails to generate files for a custom IDE or build system. We must add a <code>_Events.groovy</code> file to our Grails projects and then write an implementation for the <code>eventIntegrateWithStart</code> event. Inside the event we must define a new closure with our code to generate files. The name of the closure must have the following pattern: <code>binding.integrate<em>CustomIdentifier</em></code>. The value for <em>CustomIdentifier</em> can be used as an argument for the <code>integrate-with</code> command.</p><p>Suppose we want to extend <code>integrate-with</code> to generate a simple <a href="http://www.sublimetext.com">Sublime Text</a> project file. First we create a template Sublime Text project file where we define folders for a Grails application. We create the folder <code>src/ide-support/sublimetext</code> and add the file <code>grailsProject.sublimetext-project</code> with the following contents:<br />
+</p><pre class="brush:plain">{
+    "folders": [
+        {
+            "name": "Domain classes",
+            "path": "grails-app/domain"
+        },
+        {
+            "name": "Controllers",
+            "path": "grails-app/controllers"
+        },
+        {
+            "name": "Taglibs",
+            "path": "grails-app/taglib"
+        },
+        {
+            "name": "Views",
+            "path": "grails-app/views"
+        },
+        {
+            "name": "Services",
+            "path": "grails-app/services"
+        },
+        {
+            "name": "Configuration",
+            "path": "grails-app/conf"
+        },
+        {
+            "name": "grails-app/i18n",
+            "path": "grails-app/i18n"
+        },
+        {
+            "name": "grails-app/utils",
+            "path": "grails-app/utils"
+        },
+        {
+            "name": "grails-app/migrations",
+            "path": "grails-app/migrations"
+        },
+        {
+            "name": "web-app",
+            "path": "web-app"
+        },
+        {
+            "name": "Scripts",
+            "path": "scripts"
+        },
+        {
+            "name": "Sources:groovy",
+            "path": "src/groovy"
+        },
+        {
+            "name": "Sources:java",
+            "path": "src/java"
+        },
+        {
+            "name": "Tests:integration",
+            "path": "test/integration"
+        },
+        {
+            "name": "Tests:unit",
+            "path": "test/unit"
+        },
+        {
+            "name": "All files",
+            "follow_symlinks": true,
+            "path": "."
+        }
+    ]
+}
+</pre><p>Next we create the file <code>scripts/_Events.groovy</code>:</p><pre class="brush:groovy">includeTargets << grailsScript("_GrailsInit")
+
+eventIntegrateWithStart = {
+
+    // Usage: integrate-with --sublimeText
+    binding.integrateSublimeText = {
+
+        // Copy template file.
+        ant.copy(todir: basedir) {
+            fileset(dir: "src/ide-support/sublimetext/")
+        }
+
+        // Move template file to real project file with name of Grails application.
+        ant.move(file: "$basedir/grailsProject.sublime-project", 
+                 tofile: "$basedir/${grailsAppName}.sublime-project", 
+                 overwrite: true)
+
+        grailsConsole.updateStatus "Created SublimeText project file"
+    }
+}
+</pre>
+<p>We are done and can now run the <code>integrate-with</code> command with the new argument <code>sublimeText</code>:
+</p><pre class="brush:plain;light:true">$ grails integrate-with --sublimeText
+| Created SublimeText project file.
+$
+</pre><p>If we open the project in Sublime Text we see our folder structure for a Grails application:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-EoZX2rEetOI/U06BAbjBKGI/AAAAAAAAH_M/6qCD9f1a82w/s1600/integrate-with-st.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-EoZX2rEetOI/U06BAbjBKGI/AAAAAAAAH_M/6qCD9f1a82w/s1600/integrate-with-st.png" /></a></div><p>Code written with Grails 2.3.7.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+$ grails gG
+| Environment set to development....
+Showing script name abbreviation in Grails

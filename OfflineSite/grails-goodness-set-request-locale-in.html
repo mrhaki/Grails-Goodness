@@ -1,0 +1,85 @@
+<html>
+<head>
+
+<title>Grails Goodness: Set Request Locale in Unit Tests</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Set Request Locale in Unit Tests</h3>
+
+<div class="post">
+<p>There is really no excuse to not write unit tests in Grails. The support for writing tests is excellent, also for testing code that has to deal with the locale set in a user's request. For example we could have a controller or taglib that needs to access the locale. In a unit test we can invoke the <code>addPreferredLocale()</code> method on the mocked request object and assign a locale. The code under test uses the custom locale we set via this method.</p><p>In the following controller we create a <code>NumberFormat</code> object based on the locale in the request.</p><pre class="brush:groovy">package com.mrhaki.grails
+
+import java.text.NumberFormat
+
+class SampleController {
+
+    def index() {
+        final Float number = params.float('number')
+        final NumberFormat formatter = NumberFormat.getInstance(request.locale)
+        render formatter.format(number)
+    }
+
+}
+</pre><p>If we write a unit test we must use the method <code>addPreferredLocale()</code> to simulate the locale set in the request. In the following unit test (written with Spock) we use this method to invoke the <code>index()</code> action of the <code>SampleController</code>:</p><pre class="brush:groovy">package com.mrhaki.grails
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+import spock.lang.Unroll
+
+@TestFor(SampleController)
+class SampleControllerSpec extends Specification {
+
+    @Unroll
+    def "index must render formatted number for request locale #locale"() {
+        given: 'Set parameter number with value 42.102'
+        params.number = '42.102'
+
+        and: 'Simulate locale in request'
+        request.addPreferredLocale locale
+
+        when: 'Invoke controller action'
+        controller.index()
+
+        then: 'Check response equals expected result'
+        response.text == result
+
+        where:
+        locale           || result
+        Locale.US        || '42.102'
+        new Locale('nl') || '42,102'
+        Locale.UK        || '42.102'
+    }
+
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

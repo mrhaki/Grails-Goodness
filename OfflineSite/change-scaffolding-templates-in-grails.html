@@ -1,0 +1,66 @@
+<html>
+<head>
+
+<title>Grails Goodness: Change Scaffolding Templates in Grails</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Change Scaffolding Templates in Grails</h3>
+
+<div class="post">
+<p>The scaffolding feature in Grails is impressive, especially when we want to show off Grails to other developers. Seems like magic is happening with only a minimal of code. But what if we don't like the default pages Grails generates for us. Of course there is a way to have another layout for the dynamically generated pages.</p><p>First we start with a simple, one domain object application:</p><pre class="brush:plain;light:true">$ grails create-app scaffold-sample
+$ cd scaffold-sample
+$ grails create-domain-class message
+$ grails create-controller message</pre><p>We open <code>grails-app/domain/Message.groovy</code> and add the following simple attribute with a small constraint:</p><pre class="brush:groovy">class Message {
+    String text
+
+    static constraints = {
+        text maxLength:140
+    }
+}
+</pre><p>Next we add the magic code to the <code>grails-app/controllers/MessageController.groovy</code>:</p><pre class="brush:groovy">class MessageController {
+    def scaffold = true
+}
+</pre><p>We are ready to run the application and we are able to view, add, update or delete messages:</p><pre class="brush:plain;light:true">$ grails run-app</pre><a href="http://2.bp.blogspot.com/_-vJw6r2W-bw/Sm_fQ1y5o9I/AAAAAAAAC1c/3n7GYYJ_g4I/s1600-h/grails-scaffold1.png"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 320px; height: 198px;" src="http://2.bp.blogspot.com/_-vJw6r2W-bw/Sm_fQ1y5o9I/AAAAAAAAC1c/3n7GYYJ_g4I/s320/grails-scaffold1.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5363751161633022930" /></a> <p>We see the default layout we get from Grails. To see which GSP files Grails uses to generate these pages we only have to invoke one command:</p><pre class="brush:plain;light:true">$ grails install-templates</pre><p>After the script is finished we have a new directory <code>src/templates</code>. In this directory we find the <code>scaffolding</code> directory with a couple of GSP files. To change the layout of the pages we only have to make our changes here. Every controller which uses scaffolding will get these changes. Let's create a new CSS file and use it in the <code>create.gsp</code>, <code>edit.gsp</code>, <code>list.gsp</code> and <code>show.gsp</code> files.</p><p>We create a new file <code>scaffold.css</code> in the <code>web-app/css</code> directory:</p><pre class="brush:plain">body {
+    background-color: #EFE14E;
+}
+.logo {
+    font: 28px bold Georgia;
+    color: #006DBA;
+    padding: 0.3em;
+}
+table {
+    background-color: #F3EFC9;
+}
+</pre><p>We open the files <code>create.gsp</code>, <code>edit.gsp</code>, <code>list.gsp</code> and <code>show.gsp</code> and add the following line in the HTML head section:</p><pre class="brush:html;light:true">&lt;link rel="stylesheet" href="\${resource(dir: 'css', file: 'scaffold.css')}"/&gt;
+</pre><p>Now when we run the application again we see that the dynamically generated pages are using the new CSS file:</p><a href="http://3.bp.blogspot.com/_-vJw6r2W-bw/Sm_fRCW9IiI/AAAAAAAAC1k/6FcY370N-pA/s1600-h/grails-scaffold2.png"><img style="display:block; margin:0px auto 10px; text-align:center;cursor:pointer; cursor:hand;width: 320px; height: 198px;" src="http://3.bp.blogspot.com/_-vJw6r2W-bw/Sm_fRCW9IiI/AAAAAAAAC1k/6FcY370N-pA/s320/grails-scaffold2.png" border="0" alt=""id="BLOGGER_PHOTO_ID_5363751165005472290" /></a> <p>Besides a simple change like this, we can of course do anything we want with the GSP files that are used for scaffolding. In the above screenshot we can see for example we have removed the default Grails logo and replaced it with our own text.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

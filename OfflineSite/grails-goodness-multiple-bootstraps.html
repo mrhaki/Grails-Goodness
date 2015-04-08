@@ -1,0 +1,59 @@
+<html>
+<head>
+
+<title>Grails Goodness: Multiple BootStraps</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Multiple BootStraps</h3>
+
+<div class="post">
+<p>In Grails we can execute code when the application starts and stops. We just have to write our code in <code>grails-app/conf/BootStrap.groovy</code>. Code that needs to be executed at startup must be written in the closure <code>init</code>. In the <code>destroy</code> closure we can write code that needs be executed when the application stops. But we are not limited to one <code>BootStrap</code> class. We can create multiple BootStrap classes as long as it is placed in the <code>grails-app/conf</code> directory and the name ends with <code>BootStrap</code>.</p><pre class="brush:groovy">// File: grails-app/conf/BootStrap.groovy
+class BootStrap {
+    def init = { servletContext -&gt;
+        log.debug("Running init BootStrap")
+    }
+    def destroy = {
+        log.debug("Running destroy BootStrap")
+    }
+}
+</pre><p>And we can create another bootstrap class:</p><pre class="brush:groovy">// File: grails-app/conf/SampleBootStrap.groovy
+class SampleBootStrap {
+    def init = { servletContext -&gt;
+        log.debug("Running init SampleBootStrap")
+    }
+    def destroy = {
+        log.debug("Running destroy SampleBootStrap")
+    }
+}
+</pre><p>Code written with Grails 2.3.7.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

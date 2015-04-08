@@ -1,0 +1,47 @@
+<html>
+<head>
+
+<title>Grails Goodness: Create New Application without Wrapper</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Create New Application without Wrapper</h3>
+
+<div class="post">
+<p>Since the latest Grails versions a Grails wrapper is automatically created when we execute the <code>create-app</code> command. If we don't want the wrapper to be created we can use the command argument <code>--skip-wrapper</code>. If later we changed our mind and want the Grails wrapper we can simply run the <code>wrapper</code> command from our Grails application directory.</p><p>Let's run the <code>create-app</code> command with the <code>--skip-wrapper</code> argument. If we check the contents of the created directory we see that the wrapper files are not created:</p><pre class="brush:plain;light:true">$ grails create-app --skip-wrapper sample 
+$ cd sample
+$ ls
+application.properties lib   src   web-app
+grails-app  scripts   test
+$
+</pre><p><p>Written with Grails 2.4.4.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

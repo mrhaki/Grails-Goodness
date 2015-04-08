@@ -3,7 +3,7 @@ import groovy.xml.*
 baseDir = '../Blog/Posts'
 
 def bloggerId = '6671019398434141469'
-def baseURI = "http://www.blogger.com/feeds/$bloggerId/posts/default/-/Groovy%3AGoodness" 
+def baseURI = "https://www.blogger.com/feeds/$bloggerId/posts/default/-/Grails%3AGoodness" 
 
 def nextLink = baseURI 
 
@@ -13,7 +13,7 @@ while (nextLink) {
     feed.entry.each { 
         handleEntry(it) 
     }
-    nextLink = feed.link.find { it.@rel == 'next' }.@href.toString() - '/-/Groovy%3AGoodness'
+    nextLink = feed.link.find { it.@rel == 'next' }.@href.toString() - '/-/Grails%3AGoodness'
 }
 
 def handleEntry(entry) {
@@ -51,7 +51,7 @@ def handleText(content, dir) {
 }
 
 def createDirectory(title) {    
-    def newTitle = title.toString() - "Groovy Goodness: "
+    def newTitle = title.toString() - "Grails Goodness: "
     newTitle = newTitle.trim()
     newTitle = newTitle.replaceAll(/(,|'|"|\?|:|\/)/, '')
     newTitle = newTitle.replaceAll(/(\.)/, ' ')

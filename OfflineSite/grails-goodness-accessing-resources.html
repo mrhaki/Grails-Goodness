@@ -1,0 +1,80 @@
+<html>
+<head>
+
+<title>Grails Goodness: Accessing Resources with Resource and ResourceLocator</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Accessing Resources with Resource and ResourceLocator</h3>
+
+<div class="post">
+<p>Grails uses Spring and we can piggyback on the Spring support for resource loading to find for examples files in the classpath of our application. We can use the Spring <code>org.springframework.core.io.Resource</code> or <code>org.springframework.core.io.ResourceLoader</code> interface to find resources in our application.</p><p>And since Grails 2.0 we can also use the <code>org.codehaus.groovy.grails.core.io.ResourceLocator</code> interface. In our code we can use the <code>grailsResourceLocator</code> service which implements the <code>ResourceLocator</code> interface. We must inject the <code>grailsResourceLocator</code> service into our code and we use the method <code>findResourceForURI(String)</code> to find a resource. The advantage of the <code>grailsResourceLocator</code> service is that it knows about a Grails application. For example resources in plugins can also be accessed.</p><p>First we look at a sample Grails service with a <code>Resource</code> property with the name <code>template</code>. In our code we get the actual resource using the <code>getURL()</code> method. The value of the <code>Resource</code> property we set in <code>grails-app/conf/Config.groovy</code>. We rely on the automatic conversion of properties of Spring so we can use a value like <code>classpath:filename.txt</code> and it will be converted to a <code>Resource</code> implementation.</p><pre class="brush:groovy;highlight:[7,12]">package com.mrhaki.templates
+
+import groovy.text.SimpleTemplateEngine
+import org.springframework.core.io.Resource
+
+class MessageService {
+
+    Resource template
+
+    String followUpMessage(final String user, final String subject) {
+        final Map binding = [user: user, subject: subject]
+        final SimpleTemplateEngine templateEngine = new SimpleTemplateEngine()
+        templateEngine.createTemplate(template.URL).make(binding)
+    }
+}
+</pre><p>In <code>grails-app/conf/Config.groovy</code> we define:</p><pre class="brush:groovy">...
+beans {
+    messageService {
+        template = 'classpath:/com/mrhaki/templates/mail.template'
+    }
+}
+...
+</pre><p>If we use the <code>grailsResourceLocator</code> we get the following service implementation:</p><pre class="brush:groovy;highlight:[6,11,14]">package com.mrhaki.templates
+
+import groovy.text.SimpleTemplateEngine
+
+class MessageService {
+
+    def grailsResourceLocator
+
+    String template
+
+    String followUpMessage(final String user, final String subject) {
+        final Resource template = grailsResourceLocator.findResourceForURI(template)
+        final Map binding = [user: user, subject: subject]
+        final SimpleTemplateEngine templateEngine = new SimpleTemplateEngine()
+        templateEngine.createTemplate(template.URL).make(binding)
+    }
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

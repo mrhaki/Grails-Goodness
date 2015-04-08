@@ -1,0 +1,57 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Aliases as Command Shortcuts</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Aliases as Command Shortcuts</h3>
+
+<div class="post">
+<p>In Grails we can add aliases for standard Grails commands with the <code>alias</code> command. For example we want to use another name for a command or combine a command with arguments to a single alias. With the following command we create a <code>start-app</code> alias for the standard <code>run-app</code> command:</p><pre class="brush:plain;light:true">$ grails alias start-app run-app
+Alias start-app with value run-app configured
+$
+</pre><p>Now we can invoke <code>$ grails start-app</code> as an alternative for <code>run-app</code>. All aliases are stored in the file <code>userHome/.grails/.aliases</code>. This means the aliases we create are available for all Grails versions and applications of the current user. It is also good to notice than command arguments that start with <code>-</code> or <code>--</code> are not saved as part of an alias. But for example the <code>unit:</code> argument for <code>test-app</code> can be part of an alias:</p><pre class="brush:plain;light:true">$ grails alias unitTest test-app unit:
+Alias unitTest with value test-app unit: configured
+$
+</pre><p>We can even specify test class patterns to be part of the alias. We then invoke the new alias with extra arguments <code>-echoOut</code> and <code>-echoErr</code>:</p><pre class="brush:plain;light:true">$ grails alias test-controllers test-app unit: *Controller
+Alias test-controllers with value test-app unit: *Controller configured
+$ grails test-controllers -echoOut -echoErr
+...
+$ 
+</pre><p>To delete an alias we can remove it from the file <code>userHome/.grails/.aliases</code> or use <code>$ grails alias --delete=<em>alias</em></code>.</p><p>We can see which aliases are defined with the <code>--list</code> argument:</p><pre class="brush:plain;light:true">$ grails alias --list
+test-controllers = test-app unit: *Controller
+start-app = run-app
+unitTest = test-app unit:
+$
+</pre><p>Code written with Grails 2.3.8.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

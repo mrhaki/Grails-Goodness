@@ -1,0 +1,41 @@
+<html>
+<head>
+
+<title>Grails Goodness: Debugging App in Forked Mode</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Debugging App in Forked Mode</h3>
+
+<div class="post">
+<p>Since Grails 2.2 by default the <code>run-app</code> command will launch the Grails application in a separate Java Virtual Machine. This is called forked Tomcat execution in Grails. This way the class path of the Grails build system and the application will not intervene and also both processes will have their own memory settings. We can see the settings in <code>grails-app/conf/BuildConfig.groovy</code> where we find the configuration property <code>grails.project.fork.run</code>. When we want to debug our application in an IDE like IntelliJ IDEA we cannot use the <em>Debug</em> command, because this will only allow us to debug the Grails build system. We will not reach breakpoints in our source code. But Grails 2.3 introduces an extra argument for the <code>run-app</code> command: <code>--debug-fork</code>. If we use this extra argument the JVM running the Grails application will stop and listen for a debug session to be attached and then continue. We can configure a <em>Debug configuration</em> in IntelliJ IDEA (or another IDE) to attach to the waiting Grails application and use breakpoints and other debugging tools like we are used to.</p><p>Suppose we have a Grails application named <em>forked-debug</em> and we have created a project in IDEA for this application. We click on the <em>Select Run/Debug Configuration</em> button and select <em>Edit Configurations...</em>:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-1eQAonyftdY/UqhTaDSrBsI/AAAAAAAAHow/BBJTGtXdSmg/s1600/grails-debug-fork-edit-conf.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://2.bp.blogspot.com/-1eQAonyftdY/UqhTaDSrBsI/AAAAAAAAHow/BBJTGtXdSmg/s1600/grails-debug-fork-edit-conf.png" /></a></div><p>IDEA opens a dialog where we can change the Grails command and set JVM options. We add the option <code>--debug-fork</code> to the <em>Command Line</em> field in this dialog:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-1qqcLIwTxFs/UqhTmomC4hI/AAAAAAAAHo4/s_iVofRa2Ko/s1600/grails-debug-fork-idea.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-1qqcLIwTxFs/UqhTmomC4hI/AAAAAAAAHo4/s_iVofRa2Ko/s1600/grails-debug-fork-idea.png" height="191" width="400" /></a></div><p>We click the <em>OK</em> button to save our change and close the dialog window. Next we can run our Grails application using our changed run configuration:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-A1bl6yCIw0U/UqhTvRR9fKI/AAAAAAAAHpA/3u7OGKSkR2k/s1600/grails-debug-fork-execute.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-A1bl6yCIw0U/UqhTvRR9fKI/AAAAAAAAHpA/3u7OGKSkR2k/s1600/grails-debug-fork-execute.png" /></a></div><p>IDEA starts our application in the console window we can see <code>Listening for transport dt_socket at address: 5005</code>:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-3xokrFUxaf0/UqhT2Obf_aI/AAAAAAAAHpI/Ce4npJ70Sds/s1600/Screen+Shot+2013-12-11+at+12.30.22+.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://2.bp.blogspot.com/-3xokrFUxaf0/UqhT2Obf_aI/AAAAAAAAHpI/Ce4npJ70Sds/s1600/Screen+Shot+2013-12-11+at+12.30.22+.png" height="320" width="400" /></a></div><p>Now it is time to create a new debug configuration. We click on the <em>Select Run/Debug Configuration</em> button again and select <em>Edit Configurations...</em>. We add a new type of configuration, so we click on the <em>+</em> sign and type <em>Remote</em>:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-btTfbGJV6Uc/UqhT6cdTq_I/AAAAAAAAHpQ/cIAHJnaaFc4/s1600/grails-debug-fork-remote-conf.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-btTfbGJV6Uc/UqhT6cdTq_I/AAAAAAAAHpQ/cIAHJnaaFc4/s1600/grails-debug-fork-remote-conf.png" height="192" width="400" /></a></div><p>We select the <em>Remote</em> type and the dialog window shows now a lot of input fields which we can leave to the default values. It is good to given this configuration a new name, for example <em>Grails:forked-debug (debug)</em>:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-cv4KyQBUUe4/UqhUDF3UHqI/AAAAAAAAHpY/NTjK640jawU/s1600/grails-debug-fork-remote-conf1.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://2.bp.blogspot.com/-cv4KyQBUUe4/UqhUDF3UHqI/AAAAAAAAHpY/NTjK640jawU/s1600/grails-debug-fork-remote-conf1.png" height="356" width="400" /></a></div><p>We click the <em>OK</em> button to close the dialog window. Our Grails application is still waiting for a debug session to be attached, so we use our new configuration with the <em>Debug</em> button:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-nqVHSJpGj4M/UqhUK_Xql_I/AAAAAAAAHpg/wvGPHnDx4w0/s1600/grails-debug-fork-run-debugmode.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://2.bp.blogspot.com/-nqVHSJpGj4M/UqhUK_Xql_I/AAAAAAAAHpg/wvGPHnDx4w0/s1600/grails-debug-fork-run-debugmode.png" /></a></div><p>In the console window of our Grails application we can see the application is now continuing to start and finally we can reach the application via our web browser. We can now place breakpoints in our source code and when we hit them we can use all debugging tools from IDEA:</p><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-A12ThaBiufQ/UqhUPEnB2gI/AAAAAAAAHpo/W3R5TqWjstg/s1600/grails-debug-fork-breakpoint.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-A12ThaBiufQ/UqhUPEnB2gI/AAAAAAAAHpo/W3R5TqWjstg/s1600/grails-debug-fork-breakpoint.png" height="311" width="400" /></a></div><p>We could also have used the argument <code>--debug-fork</code> from a command-line and then use the IDEA debug configuration to attach to that instance of the Grails application.</p><p>Code written with Grails 2.3.4 and IntelliJ IDEA 13 is used.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

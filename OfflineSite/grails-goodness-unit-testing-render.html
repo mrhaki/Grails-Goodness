@@ -1,0 +1,115 @@
+<html>
+<head>
+
+<title>Grails Goodness: Unit Testing Render Templates from Controller</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Unit Testing Render Templates from Controller</h3>
+
+<div class="post">
+<p>In a <a href="http://mrhaki.blogspot.com/2013/05/grails-goodness-testing-views-and.html">previous blog post</a> we learned how we can unit test a template or view independently. But what if we want to unit test a controller that uses the <code>render()</code> method and a template with the <code>template</code> key instead of a view? Normally the view and model are stored in the <code>modelAndView</code> property of the response. We can even use shortcuts in our test code like <code>view</code> and <code>model</code> to check the result. But a <code>render()</code> method invocation with a <code>template</code> key will simply execute the template (also in test code) and the result is put in the response. With the <code>text</code> property of the response we can check the result.</p><p>In the following sample controller we use the <code>header</code> template and pass a <code>username</code> model property to render output.</p><pre class="brush:html">%{-- File: /grails-app/views/sample/_header.gsp --}%
+&lt;g:if test="${username}"&gt;
+    &lt;h1&gt;Hi, ${username}&lt;/h1&gt;
+&lt;/g:if&gt;
+&lt;g:else&gt;
+    &lt;h1&gt;Welcome&lt;/h1&gt;
+&lt;/g:else&gt;
+</pre><pre class="brush:groovy">package com.mrhaki.grails.web
+
+class SampleController {
+
+    def index() {
+        render template: 'header', model: [username: params.username]
+    }
+
+}
+</pre><p>With this Spock specification we test the <code>index()</code> action:</p><pre class="brush:groovy">package com.mrhaki.grails.web
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SampleController)
+class SampleControllerSpec extends Specification {
+
+    def "index action renders template with given username"() {
+        given:
+        params.username = username
+
+        when:
+        controller.index()
+
+        then:
+        response.text.trim() == expectedOutput
+
+        where:
+        username || expectedOutput
+        'mrhaki' || '<h1>Hi, mrhaki</h1>'
+        null     || '<h1>Welcome</h1>'
+    }
+
+}
+</pre><p>Suppose we don't want to test the output of the actual template, but we only want to check in our test code that the correct template name is used and the model is correct. We can use the <code>groovyPages</code> or <code>views</code> properties in our test code to assign mock implementation for templates. The <code>groovyPages</code> or <code>views</code> are added by the <code>ControllerUnitTestMixin</code> class, which is done automatically if we use the <code>@TestFor()</code> annotation. The properties are maps where the keys are template locations and the values are strings with mock implementations for the template. For example the template location for our <code>header</code> template is <code>/sample/_header.gsp</code>. We can assign a mock String implementation with the following statement: <code>views['/sample/_header.gsp'] = 'mock implementation'</code></p><p>We can rewrite the Spock specification and now use mock implementations for the <code>header</code> template. We can even use the model in our mock implementation, so we can check if our model is send correctly to the template.</p><pre class="brush:groovy">package com.mrhaki.grails.web
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SampleController)
+class SampleControllerSpec extends Specification {
+
+    def "index action renders mock template with given username"() {
+        given:
+        // Mock implementation with escaped $ (\$), because otherwise
+        // the String is interpreted by Groovy as GString.
+        groovyPages['/sample/_header.gsp'] = "username=\${username ?: 'empty'}"
+
+        // Or we can use views property:
+        //views['/sample/_header.gsp'] = "username=\${username ?: 'empty'}"
+
+        and:
+        params.username = username
+
+        when:
+        controller.index()
+
+        then:
+        response.text.trim() == expectedOutput
+
+        where:
+        username || expectedOutput
+        'mrhaki' || 'username=mrhaki'
+        null     || 'username=empty'
+    }
+
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

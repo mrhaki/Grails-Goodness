@@ -1,0 +1,1 @@
+Sample = Blog Sample

@@ -1,0 +1,101 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Groovy SQL</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Groovy SQL</h3>
+
+<div class="post">
+<p>In a <a href="http://mrhaki.blogspot.com/2014/03/grails-goodness-using-hibernate-native.html">previous post</a> we learned how we can use Hibernate native SQL queries in our Grails application. We can also execute custom SQL with <a href="http://mrhaki.blogspot.com/2009/10/groovy-goodness-groovy-sql.html">Groovy SQL</a>. We must create a new instance of <code>groovy.sql.Sql</code> in our code to execute SQL code. The easiest way is to use a <code>javax.sql.DataSource</code> as a constructor argument for the <code>groovy.sql.Sql</code> class. In a Grails application context we already have a <code>DataSource</code> and we can use it to inject it into our code. We must use the name <code>dataSource</code> to reference the default datasource in a Grails application.</p><p>In the following sample we invoke a custom query (for Firebird) using Groovy SQL. Notice we define a property <code>dataSource</code> in the Grails service <code>PersonService</code> and Grails will automatically inject a <code>DataSource</code> instance.</p><pre class="brush:groovy">package com.mrhaki.grails
+
+import groovy.sql.Sql
+import groovy.sql.GroovyRowResult
+
+class PersonService {
+
+    // Reference to default datasource.
+    def dataSource
+
+    List&lt;GroovyRowResult&gt; allPersons(final String searchQuery) {
+        final String searchString = "%${searchQuery.toUpperCase()}%"
+
+        final String query = '''\
+            select id, name, email 
+            from person 
+            where upper(email collate UNICODE_CI_AI) like :search
+        '''
+
+        // Create new Groovy SQL instance with injected DataSource.
+        final Sql sql = new Sql(dataSource)
+
+        final results = sql.rows(query, search: searchString)
+        results
+    }
+
+}
+</pre><p>We can even make the <code>groovy.sql.Sql</code> instance a Spring bean in our Grails application. Then we can inject the <code>Sql</code> instance in for example a Grails service. In <code>grails-app/conf/spring/resources.groovy</code> we define the <code>Sql</code> bean:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+beans = {
+
+    // Create Spring bean for Groovy SQL.
+    // groovySql is the name of the bean and can be used
+    // for injection. 
+    groovySql(groovy.sql.Sql, ref('dataSource'))
+
+}
+</pre><p>Now we can rewrite our previous sample and use the bean <code>groovySql</code>:</p><pre class="brush:groovy">package com.mrhaki.grails
+
+import groovy.sql.GroovyRowResult
+
+class PersonService {
+
+    // Reference to groovySql defined in resources.groovy.
+    def groovySql
+
+    List&lt;GroovyRowResult&gt; allPersons(final String searchQuery) {
+        final String searchString = "%${searchQuery.toUpperCase()}%"
+
+        final String query = '''\
+            select id, name, email 
+            from person 
+            where upper(email collate UNICODE_CI_AI) like :search
+        '''
+
+        // Use groovySql bean to execute the query.
+        final results = groovySql.rows(query, search: searchString)
+        results
+    }
+
+}
+</pre><p>Code written with Grails 2.3.7.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

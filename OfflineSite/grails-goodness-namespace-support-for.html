@@ -1,0 +1,112 @@
+<html>
+<head>
+
+<title>Grails Goodness: Namespace Support for Controllers</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Namespace Support for Controllers</h3>
+
+<div class="post">
+<p>In a Grails application we can organize our controllers into packages, but if we use the same name for multiple controllers, placed in different packages, then Grails cannot resolve the correct controller name. Grails ignores the package name when finding a controller by name. But with namespace support since Grails 2.3 we can have controllers with the same name, but we can use a namespace property to distinguish between the different controllers.</p><p>We can add a new static property to a controller class with the name <code>namespace</code>. The value of this property defines the namespace. We can then write new URL mappings in the <code>grails-app/conf/UrlMappings.groovy</code> file and use the namespace value as a mapping attribute.</p><p>Suppose we have two <code>ReportController</code> classes in our application. One is defined as <code>com.mrhaki.grails.user.ReportController</code> and the other as <code>com.mrhaki.grails.common.ReportController</code>. The following code samples show sample implementations for both controllers:</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/user/ReportController.groovy
+package com.mrhaki.grails.user
+
+class ReportController {
+
+    /** Namespace is set to user. Used in URLMappings. */
+    static namespace = 'user'
+
+    def index() {
+        render 'UserReport'
+    }
+}
+</pre><p>And the second controller:</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/common/ReportController.groovy
+package com.mrhaki.grails.common
+
+class ReportController {
+
+    /** Namespace is set to common. Used in URLMappings. */
+    static namespace = 'common'
+
+    def index() {
+        render 'CommonReport'
+    }
+}
+</pre><p>In our <code>UrlMappings.groovy</code> file we can now add two extra mappings for these controllers and we use the new <code>namespace</code> attribute to point the mapping to the correct controller implementation.</p><pre class="brush:groovy">// File: grails-app/conf/UrlMappings.groovy
+class UrlMappings {
+
+    static mappings = {
+        // Define mapping to com.mrhaki.grails.user.ReportController with namespace user.
+        "/user-report/$action?/$id?(.${format})?"(controller: 'report', namespace: 'user')
+
+        // Define mapping to com.mrhaki.grails.common.ReportController with namespace common.
+        "/common-report/$action?/$id?(.${format})?"(controller: 'report', namespace: 'common')
+
+
+        // Other mappings.
+        "/$controller/$action?/$id?(.${format})?"()
+        "/"(view: "/index")
+        "500"(view: '/error')
+    }
+}
+</pre><p>The namespace support is also useful in building RESTful APIs with Grails. We can use the namespace attribute to have different versions for the same controller. For example in the following <code>UrlMappings.groovy</code> configuration we have two mappings to a controller with the same name, but the namespace attribute defines different version values:</p><pre class="brush:groovy">// File: grails-app/conf/UrlMappings.groovy
+class UrlMappings {
+
+    static mappings = {
+        // Define mapping to com.mrhaki.grails.api.v1.UserController with namespace v1.
+        "/api/v1/users"(resource: 'user', namespace: 'v1')
+
+        // Define mapping to com.mrhaki.grails.api.v2.UserController with namespace v2.
+        "/api/v2/users"(resource: 'user', namespace: 'v2')
+
+
+        // Other mappings.
+        "/"(controller: 'apiDoc')
+        "500"(controller: 'error')
+    }
+}
+</pre><p>To create links to controllers with a namespace we can use the new <code>namespace</code> attribute in the <code>link</code> and <code>createLink</code> tags. The following GSP page part shows how we can set the namespace so a correct link is generated:</p><pre class="brush:html">&lt;h2&gt;Links&lt;/h2&gt;
+&lt;ul&gt;
+    &lt;li&gt;&lt;g:link controller="report" namespace="user"&gt;User Reports&lt;/g:link&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;g:link controller="report" namespace="common"&gt;Common Reports&lt;/g:link&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;g:createLink controller="report" namespace="user"/&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;g:createLink controller="report" namespace="common"/&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</pre><p>We get the following HTML:</p><pre class="brush:html">&lt;h2&gt;Links&lt;/h2&gt;
+&lt;ul&gt;
+    &lt;li&gt;&lt;a href="/namespace-controller/user-report/index"&gt;User Reports&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="/namespace-controller/common-report/index"&gt;Common Reports&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;/namespace-controller/user-report/index&lt;/li&gt;
+    &lt;li&gt;/namespace-controller/common-report/index&lt;/li&gt;
+&lt;/ul&gt;
+</pre><p>Code written with Grails 2.3.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

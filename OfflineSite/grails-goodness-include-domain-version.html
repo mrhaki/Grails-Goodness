@@ -1,0 +1,72 @@
+<html>
+<head>
+
+<title>Grails Goodness: Include Domain Version Property in JSON and XML Output</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Include Domain Version Property in JSON and XML Output</h3>
+
+<div class="post">
+<p>We can include the <code>version</code> property of domain classes in rendered JSON or XML output. By default the <code>version</code> property is not included in generated XML and JSON. To enable inclusion of the <code>version</code> property we can set the configuration property <code>grails.converters.domain.include.version</code> with the value <code>true</code>. With this property for both XML and JSON the <code>version</code> property is included in the output. To only enable this for XML we use the property <code>grails.converters.xml.domain.include.version</code> and for JSON we use the property <code>grails.converters.json.domain.include.version</code>.</p><p>The following snippet is from <code>grails-app/conf/Config.groovy</code> where the properties are defined:<br />
+</p><pre class="brush:groovy">...
+// Include version for JSON generated output.
+//grails.converters.json.domain.include.version = true
+
+// Include version for XML generated output.
+//grails.converters.xml.domain.include.version = true
+
+// Include version for both XML and JSON output.
+grails.converters.domain.include.version = true
+...
+</pre><p>The following samples show a representation of a book resources, which is a domain class and we see the <code>version</code> property as attribute of the book XML tag.</p><pre class="brush:xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;book id="1" version="0"&gt;
+  &lt;isbn&gt;
+    0451169514
+  &lt;/isbn&gt;
+  &lt;numberOfPages&gt;
+    1104
+  &lt;/numberOfPages&gt;
+  &lt;title&gt;
+    It
+  &lt;/title&gt;
+&lt;/book&gt;
+</pre><p>In JSON the version is included as property.</p><pre class="brush:plain">{
+  "class": "com.mrhaki.grails.sample.Book",
+  "id": 1,
+  "version": 0,
+  "isbn": "0451169514",
+  "numberOfPages": 1104,
+  "title": "It"
+}
+</pre><p>Code written with Grails 2.3.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<html>
+<head>
+
+<title>Grails Goodness: Cleaning Up</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Cleaning Up</h3>
+
+<div class="post">
+<p>When we use for example the <code>compile</code> or <code>war</code> command Grails will create files and stores them by default in the project's working directory. The location of the project working directory can be customized in our <code>grails-app/conf/BuildConfig.groovy</code> configuration file. We remove the generated files with the Grails <code>clean</code> command. This command will remove all compiled class files, the WAR file, cached scripts and test reports. But this doesn't remove all files in the project working directory. For example plugins or a temporary <code>web.xml</code> file, which are stored in the project working directory are not removed. We must use the <code>clean-all</code> command to also remove those files from the project working directory completely.</p><p>Let's take a look at the default settings in our <code>grails-app/conf/BuildConfig.groovy</code> configuration file when we create a new Grails application:</p><pre class="brush:groovy">// File: grails-app/conf/BuildConfig.groovy
+...
+grails.project.class.dir = "target/classes"
+grails.project.test.class.dir = "target/test-classes"
+grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
+...
+</pre><p>After we run the <code>war</code> command we see the following contents in our <code>target</code> directory:</p><pre class="brush:shell;light:true">$ grails war
+| Compiling 10 source files
+
+| Compiling 142 source files
+
+| Done creating WAR target/cleanCmd-0.1.war
+$ ls target/
+classes   cleanCmd-0.1.war stacktrace.log  work
+</pre><p>Let's first run the <code>clean</code> command and check the contents of the <code>target</code> directory again:</p><pre class="brush:shell;light:true">$ grails clean
+| Application cleaned.
+$ ls target/
+stacktrace.log work
+</pre><p>Notice the <code>target/work</code> directory still exists. We now run <code>clean-all</code> and examine the contents of the <code>target</code> directory:</p><pre class="brush:shell;light:true">$ grails clean-all
+| Application cleaned.
+$ ls target/
+stacktrace.log
+</pre><p>Now the <code>work</code> directory is removed as well.</p><p>We can also write our own scripts to for example only remove the generated WAR file with a clean command. With the following script we add the command <code>clean-war</code> to our application, which will delete the generated WAR file from our project:</p><pre class="brush:groovy">// File: scripts/CleanWar.groovy
+includeTargets << grailsScript("_GrailsClean")
+
+setDefaultTarget("cleanWarFile")
+</pre>
+<p>We can use the targets <code>cleanCompiledSources</code>, <code>cleanTestReports</code> and <code>cleanWarFile</code> in our own scripts.</p><p>Code written with Grails 2.3.5</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

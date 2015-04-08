@@ -1,0 +1,72 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using the header Method to Set Response Headers</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using the header Method to Set Response Headers</h3>
+
+<div class="post">
+<p>Grails adds a couple of methods and properties to our controller classes automatically. One of the methods is the <code>header()</code> method. With this method we can set a response header with a name and value. The methods accepts two arguments: the first argument is the header name and the second argument is the header value.</p><p>In the following controller we invoke the <code>header()</code> method to set the header <code>X-Powered-By</code> with the Grails and Groovy version.</p><pre class="brush:groovy">package header.ctrl
+
+class SampleController {
+
+    def grailsApplication
+
+    def index() {
+        final String grailsVersion = grailsApplication.metadata.getGrailsVersion()
+        final String groovyVersion = GroovySystem.version
+        header 'X-Powered-By', "Grails: $grailsVersion, Groovy: $groovyVersion"
+    }
+
+}
+</pre><p>We can test this with the following Spock specification:</p><pre class="brush:groovy">package header.ctrl
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SampleController)
+class SampleControllerSpec extends Specification {
+
+    def "index must set response header X-Powered-By with value"() {
+        when:
+        controller.index()
+
+        then:
+        response.headerNames.contains 'X-Powered-By'
+        response.header('X-Powered-By') == 'Grails: 2.2.4, Groovy: 2.0.8'
+    }
+
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

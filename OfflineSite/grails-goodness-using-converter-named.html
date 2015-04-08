@@ -1,0 +1,171 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Converter Named Configurations with Default Renderers</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Converter Named Configurations with Default Renderers</h3>
+
+<div class="post">
+<p>Sometimes we want to support in our RESTful API a different level of detail in the output for the same resource. For example a default output with the basic fields and a more detailed output with all fields for a resource. The client of our API can then choose if the default or detailed output is needed. One of the ways to implement this in Grails is using converter named configurations.</p><p>Grails converters, like <code>JSON</code> and <code>XML</code>, support named configurations. First we need to register a named configuration with the converter. Then we can invoke the <code>use</code> method of the converter with the name of the configuration and a closure with statements to generate output. The code in the closure is executed in the <em>context</em> of the named configuration.</p><p>The default renderers in Grails, for example <code>DefaultJsonRenderer</code>, have a property <code>namedConfiguration</code>. The renderer will use the named configuration if the property is set to render the output in the <em>context</em> of the configured named configuration. Let's configure the appropriate renderers and register named configurations to support the named configuration in the default renderers.</p><p>In our example we have a <code>User</code> resource with some properties. We want to support  <em>short</em> and <em>details</em> output where different properties are included in the resulting format.</p><p>First we have our resource:</p><pre class="brush:groovy">// File: grails-app/domain/com/mrhaki/grails/User.groovy
+package com.mrhaki.grails
+
+import grails.rest.*
+
+// Set URI for resource to /users.
+// The first format in formats is the default
+// format. So we could use short if we wanted
+// the short compact format as default for this 
+// resources.
+@Resource(uri = '/users', formats = ['json', 'short', 'details'])
+class User {
+
+    String username
+    String lastname
+    String firstname
+    String email
+
+    static constraints = {
+        email email: true
+        lastname nullable: true
+        firstname nullable: true
+    }
+
+}
+</pre><p>Next we register two named configurations for this resource in our <code>Bootstrap</code>:</p><pre class="brush:groovy">// File: grails-app/conf/Bootstrap.groovy
+class Bootstrap {
+
+    def init = { servletContext ->
+        ...
+        JSON.createNamedConfig('details') {
+            it.registerObjectMarshaller(User) { User user -&gt;
+                final String fullname = [user.firstname, user.lastname].join(' ')
+                final userMap = [
+                        id      : user.id,
+                        username: user.username,
+                        email   : user.email,
+                ]
+                if (fullname) {
+                    userMap.fullname = fullname
+                }
+                userMap
+            }
+            // Add for other resources a marshaller within
+            // named configuration.
+        }
+
+        JSON.createNamedConfig('short') {
+            it.registerObjectMarshaller(User) { User user -&gt;
+                final userMap = [
+                        id      : user.id,
+                        username: user.username
+                ]
+                userMap
+            }
+            // Add for other resources a marshaller within
+            // named configuration.
+        }    
+        ...
+    }
+...
+}
+</pre><p>Now we must register custom renderers for the <code>User</code> resource as Spring components in <code>resources</code>:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+import com.mrhaki.grails.User
+import grails.rest.render.json.JsonRenderer
+import org.codehaus.groovy.grails.web.mime.MimeType
+
+beans = {
+    // Register JSON renderer for User resource with detailed output.
+    userDetailsRenderer(JsonRenderer, User) {
+        // Grails will compare the name of the MimeType
+        // to determine which renderer to use. So we 
+        // use our own custom name here. 
+        // The second argument, 'details', specifies the
+        // supported extension. We can now use
+        // the request parameter format=details to use
+        // this renderer for the User resource.
+        mimeTypes = [new MimeType('application/vnd.com.mrhaki.grails.details+json', 'details')]
+        
+        // Here we specify the named configuration
+        // that must be used by an instance
+        // of this renderer. See Bootstrap.groovy
+        // for available registered named configuration.
+        namedConfiguration = 'details'
+    }
+
+    // Register second JSON renderer for User resource with compact output.
+    userShortRenderer(JsonRenderer, User) {
+        mimeTypes = [new MimeType('application/vnd.com.mrhaki.grails.short+json', 'short')]
+
+        // Named configuration is different for short
+        // renderer compared to details renderer.
+        namedConfiguration = 'short'
+    }
+
+    // Default JSON renderer as fallback.
+    userRenderer(JsonRenderer, User) {
+        mimeTypes = [new MimeType('application/json', 'json')]
+    }
+
+}
+</pre><p>We have defined some new mime types in <code>grails-app/conf/spring/resources.groovy</code>, but we must also add them to our <code>grails-app/conf/Config.groovy</code> file:</p><pre class="brush:groovy">// File: grails-app/conf/spring/resources.groovy
+...
+grails.mime.types = [
+    ...
+    short   : ['application/vnd.com.mrhaki.grails.short+json', 'application/json'],
+    details : ['application/vnd.com.mrhaki.grails.details+json', 'application/json'],
+]
+...
+</pre><p>Our application is now ready and configured. We mostly rely on Grails content negotiation to get the correct renderer for generating our output if we request a resource. Grails content negotiation can use the value of the request parameter <code>format</code> to find the correct mime type and then the correct renderer. Grails also can check the <code>Accept</code> request header or the URI extension, but for our RESTful API we want to use the <code>format</code> request parameter.</p><p>If we invoke our resource with different formats we see the following results:</p><pre class="brush:plain;light:true">$ curl -X GET http://localhost:8080/rest-sample/users/1
+{
+    "class": "com.mrhaki.grails.User",
+    "id": 1,
+    "email": "hubert@mrhaki.com",
+    "firstname": "Hubert",
+    "lastname": "Klein Ikkink",
+    "username": "mrhaki"
+}
+$ curl -X GET http://localhost:8080/rest-sample/users/1?format=short
+{
+    "id": 1,
+    "username": "mrhaki"
+}
+$ curl -X GET http://localhost:8080/rest-sample/users/1?format=details
+{
+    "id": 1,
+    "username": "mrhaki",
+    "email": "hubert@mrhaki.com",
+    "fullname": "Hubert Klein Ikkink"
+}
+</pre><p>Code written with Grails 2.4.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Closures for Select Value Rendering</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Closures for Select Value Rendering</h3>
+
+<div class="post">
+<p>To generate an HTML <code>select</code> we can use the Grails tag <code>&lt;g:select .../&gt;</code>. We use the <code>optionValue</code> attribute to specify a specific property we want to be used as the value. But we can also define a closure for the <code>optionValue</code> attribute to further customize the value that is shown to the user.</p><p>Suppose we have a simple domain class <code>Book</code> with a couple of properties. We want to combine multiple properties as the text for the HTML <code>select</code> options. In the following GSP we define first a <code>&lt;g:select .../&gt;</code> tag where we simply use the <code>title</code> property. In the next <code>&lt;g:select .../&gt;</code> tag we use a closure to combine multiple properties.</p><p>We can also pass the closure as model property to the GSP from a controller. In a controller we define the transformation in a closure and pass it along to the GSP page. On the GSP we can use this closure as a value for the <code>optionValue</code> attribute of the <code>&lt;g:select .../&gt;</code> tag. The following GSP shows all three scenarios.</p><pre class="brush:html">&lt;%@ page import="com.mrhaki.grails.sample.Book" contentType="text/html;charset=UTF-8" %&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Simple GSP page&lt;/title&gt;
+    &lt;meta name="layout" content="main"/&gt;
+    &lt;style&gt;
+        p { margin-top: 20px; margin-bottom: 5px;}
+    &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+    &lt;h1&gt;Select&lt;/h1&gt;
+
+    &lt;p&gt;Use title property of book for option values&lt;/p&gt;
+
+    &lt;g:select from="${Book.list()}"
+          optionKey="id"
+          optionValue="title"
+          name="bookSimple"/&gt;
+
+    &lt;p&gt;Use closure for optionValue&lt;/p&gt;
+    &lt;g:select from="${Book.list()}"
+              optionKey="id"
+              optionValue="${{ book -&gt; "${book.title} - ${book.isbn}" }}"
+              name="bookCustom"/&gt;
+
+    &lt;g:set var="bookOptionValueFormatter"
+           value="${{ book -&gt; "${book.title} (${book.isbn}, ${book.numberOfPages})" }}"/&gt;
+
+    &lt;p&gt;Use bookOptionValueFormatter that is defined as variable on this page&lt;/p&gt;
+    &lt;g:select from="${Book.list()}"
+              optionKey="id"
+              optionValue="${bookOptionValueFormatter}"
+              name="bookVar"/&gt;
+
+    &lt;p&gt;Use bookFormatter that is passed as a model property from SampleController.&lt;/p&gt;
+    &lt;g:select from="${Book.list()}"
+              optionKey="id"
+              optionValue="${bookFormatter}"
+              name="bookModel"/&gt;
+
+&lt;/body&gt;
+
+
+&lt;/html&gt;
+</pre><p>Here is a sample controller which passes the transformation to the GSP:</p><pre class="brush:groovy">package com.mrhaki.grails.sample
+
+class SampleController {
+
+    def index() {
+        final formatter = { book -> "$book.title (pages: $book.numberOfPages)" }
+        [bookFormatter: formatter]
+    }
+}
+</pre><p>When we run the application and open the page in a web browser we get the following HTML source:</p><pre class="brush:html">...
+&lt;h1&gt;Select&lt;/h1&gt;
+
+&lt;p&gt;Use title property of book for option values&lt;/p&gt;
+
+&lt;select name="bookSimple" id="bookSimple" &gt;
+  &lt;option value="1" &gt;It&lt;/option&gt;
+  &lt;option value="2" &gt;The Stand&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;p&gt;Use closure for optionValue&lt;/p&gt;
+&lt;select name="bookVar" id="bookCustom" &gt;
+  &lt;option value="1" &gt;It - 0451169514&lt;/option&gt;
+  &lt;option value="2" &gt;The Stand - 0307743683&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;p&gt;Use bookOptionValueFormatter that is defined as variable on this page&lt;/p&gt;
+&lt;select name="bookVar" id="bookVar" &gt;
+  &lt;option value="1" &gt;It (0451169514, 1104)&lt;/option&gt;
+  &lt;option value="2" &gt;The Stand (0307743683, 1472)&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;p&gt;Use bookFormatter that is passed as a model property from SampleController.&lt;/p&gt;
+&lt;select name="bookModel" id="bookModel" &gt;
+  &lt;option value="1" &gt;It (pages: 1104)&lt;/option&gt;
+  &lt;option value="2" &gt;The Stand (pages: 1472)&lt;/option&gt;
+&lt;/select&gt;
+...
+</pre><p>The <code>optionKey</code> attribute also allows closures as arguments.</p><p>Code written with Grails 2.3.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

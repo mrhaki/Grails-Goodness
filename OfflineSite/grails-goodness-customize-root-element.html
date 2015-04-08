@@ -1,0 +1,132 @@
+<html>
+<head>
+
+<title>Grails Goodness: Customize Root Element Name Collections for XML Marshalling</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Customize Root Element Name Collections for XML Marshalling</h3>
+
+<div class="post">
+<p>When we convert a <code>List</code> or <code>Set</code> to XML using the Grails XML marshalling support the name of the root element is either <code>&lt;list&gt;</code> or <code>&lt;set&gt;</code>. We can change this name by extending the <code>org.codehaus.groovy.grails.web.converters.marshaller.xml.CollectionMarshaller</code>. We must override the method <code>supports()</code> to denote the type of collection we want to customize the root element name for. And we must override the method <code>getElementName()</code> which returns the actual name of the root element for the <code>List</code> or <code>Set</code>.</p><p>Let's first see the default output of a collection of <code>Book</code> domain classes. In a controller we have the following code:</p><pre class="brush:groovy">package com.mrhaki.grails.sample
+
+class SampleController {
+    def list() {
+        // To force 404 when no results are found
+        // we must return null, because respond method
+        // checks explicitly for null value and 
+        // not Groovy truth.
+        respond Book.list() ?: null
+    }
+}
+</pre><p>The XML output is:</p><pre class="brush:xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;list&gt;
+  &lt;book id="1" version="0"&gt;
+    &lt;author id="1" /&gt;
+    &lt;isbn&gt;
+      0451169514
+    &lt;/isbn&gt;
+    &lt;numberOfPages&gt;
+      1104
+    &lt;/numberOfPages&gt;
+    &lt;title&gt;
+      It
+    &lt;/title&gt;
+  &lt;/book&gt;
+  &lt;book id="2" version="0"&gt;
+    &lt;author id="1" /&gt;
+    &lt;isbn&gt;
+      0307743683
+    &lt;/isbn&gt;
+    &lt;numberOfPages&gt;
+      1472
+    &lt;/numberOfPages&gt;
+    &lt;title&gt;
+      The stand
+    &lt;/title&gt;
+  &lt;/book&gt;
+&lt;/list&gt;
+</pre><p>To change the element name <code>list</code> to <code>books</code> we add the following code to the <code>init</code> closure in <code>grails-app/app/BootStrap.groovy</code>:</p><pre class="brush:groovy">// File: grails-app/conf/BootStrap.groovy
+import com.mrhaki.grails.sample.Book
+import grails.converters.XML
+import org.codehaus.groovy.grails.web.converters.marshaller.xml.CollectionMarshaller
+
+class BootStrap {
+
+    def init = { servletContext ->
+        // Register custom collection marshaller for List with Book instances.
+        // The root element name is set to books.
+        XML.registerObjectMarshaller(new CollectionMarshaller() {
+            @Override
+            public boolean supports(Object object) {
+                // We know there is at least one result, 
+                // otherwise the controller respond method
+                // would have returned a 404 response code.
+                object instance of List && object.first() instance of Book
+            }
+
+            @Override
+            String getElementName(final Object o) {
+                'books'
+            }
+        })
+    }
+}
+</pre><p>Now when we render a list of <code>Book</code> instances we get the following XML:</p><pre class="brush:xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;books&gt;
+  &lt;book id="1" version="0"&gt;
+    &lt;author id="1" /&gt;
+    &lt;isbn&gt;
+      0451169514
+    &lt;/isbn&gt;
+    &lt;numberOfPages&gt;
+      1104
+    &lt;/numberOfPages&gt;
+    &lt;title&gt;
+      It
+    &lt;/title&gt;
+  &lt;/book&gt;
+  &lt;book id="2" version="0"&gt;
+    &lt;author id="1" /&gt;
+    &lt;isbn&gt;
+      0307743683
+    &lt;/isbn&gt;
+    &lt;numberOfPages&gt;
+      1472
+    &lt;/numberOfPages&gt;
+    &lt;title&gt;
+      The stand
+    &lt;/title&gt;
+  &lt;/book&gt;
+&lt;/books&gt;
+</pre><p>To customize the XML marshaling output for <code>Map</code> collections we must subclass <code>org.codehaus.groovy.grails.web.converters.marshaller.xml.MapMarshaller</code>.</p><p>Code written with Grails 2.3.2</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

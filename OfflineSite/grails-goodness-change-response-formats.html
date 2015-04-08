@@ -1,0 +1,87 @@
+<html>
+<head>
+
+<title>Grails Goodness: Change Response Formats in RestfulController</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Change Response Formats in RestfulController</h3>
+
+<div class="post">
+<p>We can write a RESTful application with Grails and define our API in different ways. One of them is to subclass the <code>grails.rest.RestfulController</code>. The <code>RestfulController</code> already contains a lot of useful methods to work with resources. For example all CRUD methods (<code>save/show/update/delete</code>) are available and are mapped to the correct HTTP verbs using a URL mapping with the <code>resource(s)</code> attribute.</p><p>We can define which content types are supported with the static variable <code>responseFormats</code> in our controller. The variable should be a list of <code>String</code> values with the supported formats. The list of supported formats applies to all methods in our controller. The names of the formats are defined in the configuration property <code>grails.mime.types</code>. We can also use a <code>Map</code> notation with the <code>supportedFormats</code> variable. The key of the map is the method name and the value is a list of formats.</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/UserApiController.groovy
+package com.mrhaki.grails
+
+import grails.rest.*
+
+class UserApiController extends RestfulController {
+
+    // Use Map notation to set supported formats
+    // per action.
+    static responseFormats = [
+        index: ['xml', 'json'],  // Support both XML, JSON
+        show: ['json']           // Only support JSON
+    ]
+
+    // We make the resource read-only in
+    // the constructor.
+    UserApiController() {
+        super(User, true /* read-only */)
+    }
+
+}
+</pre><p>We can also specify supported formats per action using the <code>respond</code> method in our controller. We can define the named argument <code>formats</code> followed by a list of formats when we invoke the <code>respond</code> method. In the following controller we override the <code>index</code> and <code>show</code> methods and use the <code>formats</code> attribute when we use the <code>respond</code> method:</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/UserApiController.groovy
+package com.mrhaki.grails
+
+import grails.rest.*
+
+class UserApiController extends RestfulController {
+
+    // We make the resource read-only in
+    // the constructor.
+    UserApiController() {
+        super(User, true /* read-only */)
+    }
+
+    @Override
+    def index(Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+        respond listAllResources(params), formats: ['xml', 'json']
+    }
+
+    @Override
+    def show() {
+        respond queryForResource(params.id), formats: ['json']
+    }
+
+}
+</pre><p>Code written with Grails 2.4.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

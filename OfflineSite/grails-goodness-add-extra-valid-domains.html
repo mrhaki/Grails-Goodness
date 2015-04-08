@@ -1,0 +1,56 @@
+<html>
+<head>
+
+<title>Grails Goodness: Add Extra Valid Domains and Authorities for URL Validation</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Add Extra Valid Domains and Authorities for URL Validation</h3>
+
+<div class="post">
+<p>Grails has a built-in URL constraint to check if a String value is a valid URL. We can use the constraint in our code to check for example that the user input <tt>http://www.mrhaki.com</tt> is valid and <tt>http://www.invalid.url</tt> is not. The basic URL validation checks the value according to standards RFC1034 and RFC1123. If want to allow other domain names, for example server names found in our internal network, we can add an extra parameter to the URL constraint. We can pass a regular expressions or a list of regular expressions for patterns that we want to allow to pass the validation. This way we can add IP addresses, domain names and even port values that are all considered valid. The regular expression is matched against the so called authority part of the URL. The authority part is a hostname, colon (<code>:</code>) and port number.</p><p>In the following sample code we define a simple command object with a String property <code>address</code>. In the <code>constraints</code> block we use the URL constraint. We assign a list of regular expression String values to the URL constraint. Each of the given expressions are valid authorities, we want the validation to be valid. Instead of a list of values we can also assign one value if needed. If we don't want to add extra valid authorities we can simple use the parameter <code>true</code>.</p><pre class="brush:groovy">// Sample command object with URL constraint.
+class WebAddress {
+    String address
+
+    static constraints = {
+        address url: ['129.167.0.1:\\d{4}', 'mrhaki'] 
+
+        // Or one String value if only regular expression is necessary: 
+        // address url: '129.167.0.1:\\d{4}'
+
+        // Or simple enable URL validation and don't allow
+        // extra hostnames or authorities to be valid
+        // address url: true
+    }
+}
+</pre><p>Code written with Grails 2.2.4</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

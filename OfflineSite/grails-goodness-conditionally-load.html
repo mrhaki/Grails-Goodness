@@ -1,0 +1,85 @@
+<html>
+<head>
+
+<title>Grails Goodness: Conditionally Load Beans in Java Configuration Based on Grails Environment</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Conditionally Load Beans in Java Configuration Based on Grails Environment</h3>
+
+<div class="post">
+<p><b>UPDATE:</b> the original blog post shows an implementation for a <code>@GrailsEnv</code> annotation to load beans based on the current Grails environment, but it turns out the <code>@Profile</code> annotation from Spring also works perfectly fine in Grails! Grails will set the current environment name as an active Spring profile, so it is even easier to load beans based on the current Grails environment.</p><p>In a <a href="http://mrhaki.blogspot.com/2014/08/grails-goodness-use-spring-java.html">previous post</a> we saw that we can use Spring's Java configuration feature to load beans in our Grails application. We can use the <code>@Profile</code> annotation to conditionally load beans based on the currently active Spring profile. We can for example use the Java system property <code>spring.profiles.active</code> when we start the Grails application to make a profile active. But wouldn't it be nice if we could use the Grails environment setting to conditionally load beans from a Java configuration? As it turns out Grails already set the current Grails environment name as the active profile for the Grails application. So we can simply use <code>@Profile</code> in our configuration or component classes, like in a non-Grails Spring application.</p><p>We can use the <code>@Profile</code> annotation in a Spring Java configuration class. The following sample shows different values for the <code>@Profile</code> annotation. The annotation is applied to methods in the sample code, but can also be applied to a class.</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/grails/configuration/BeansConfiguration.groovy
+package com.mrhaki.grails.configuration
+
+import org.springframework.context.annotation.*
+
+@Configuration
+class BeansConfiguration {
+
+    // Load for Grails environments 
+    // development or test
+    @Bean
+    @Profile(['development', 'test'])
+    Sample sampleBean() {
+        new Sample('sampleBean')
+    }
+
+    // Load for every Grails environment NOT
+    // being production.
+    @Bean
+    @Profile('!production')
+    Sample sample() {
+        new Sample('sample')
+    }
+
+    // Load for custom environment name qa.
+    @Bean
+    @Profile('qa')
+    Sample sampleQA() {
+        new Sample('QA')
+    }
+
+}
+</pre><p>We can also use the annotation for classes that are annotated with the <code>@Component</code> annotation:</p><pre class="brush:groovy">// File: src/groovy/com/mrhaki/grails/Person.groovy
+package com.mrhaki.grails
+
+import org.springframework.stereotype.Component
+import org.springframework.context.annotation.Profile
+
+@Component
+@Profile('development')
+class Person {
+    String name
+    String email
+}
+</pre><p>Code written with Grails 2.4.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<html>
+<head>
+
+<title>Grails Goodness: Using Hibernate Native SQL Queries</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Using Hibernate Native SQL Queries</h3>
+
+<div class="post">
+<p>Sometimes we want to use Hibernate native SQL in our code. For example we might need to invoke a selectable stored procedure, we cannot invoke in another way. To invoke a native SQL query we use the method <code>createSQLQuery()</code> which is available from the Hibernate session object. In our Grails code we must then first get access to the current Hibernate session. Luckily we only have to inject the <code>sessionFactory</code> bean in our Grails service or controller. To get the current session we invoke the <code>getCurrentSession()</code> method and we are ready to execute a native SQL query. The query itself is defined as a <code>String</code> value and we can use placeholders for variables, just like with other Hibernate queries.</p><p>In the following sample we create a new Grails service and use a Hibernate native SQL query to execute a selectable stored procedure with the name <code>organisation_breadcrumbs</code>. This stored procedure takes one argument <code>startId</code> and will return a list of results with an id, name and level column.</p><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/grails/OrganisationService.groovy
+package com.mrhaki.grails
+
+import com.mrhaki.grails.Organisation
+
+class OrganisationService {
+
+    // Auto inject SessionFactory we can use
+    // to get the current Hibernate session.
+    def sessionFactory
+
+    List&lt;Organisation&gt; breadcrumbs(final Long startOrganisationId) {
+
+        // Get the current Hiberante session.
+        final session = sessionFactory.currentSession
+
+        // Query string with :startId as parameter placeholder.
+        final String query = 'select id, name, level from organisation_breadcrumbs(:startId) order by level desc'
+
+        // Create native SQL query.
+        final sqlQuery = session.createSQLQuery(query)
+
+        // Use Groovy with() method to invoke multiple methods
+        // on the sqlQuery object.
+        final results = sqlQuery.with {
+            // Set domain class as entity. 
+            // Properties in domain class id, name, level will
+            // be automatically filled.
+            addEntity(Organisation)
+
+            // Set value for parameter startId.
+            setLong('startId', startOrganisationId)
+
+            // Get all results.
+            list()
+        }
+
+        results
+    }
+
+}
+</pre><p>In the sample code we use the <code>addEntity()</code> method to map the query results to the domain class <code>Organisation</code>. To transform the results from a query to other objects we can use the <code>setResultTransformer()</code> method. Hibernate (and therefore Grails if we use the Hibernate plugin) already has a set of transformers we can use. For example with the <code>org.hibernate.transform.AliasToEntityMapResultTransformer</code> each result row is transformed into a <code>Map</code> where the column aliases are the keys of the map.</p><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/grails/OrganisationService.groovy
+package com.mrhaki.grails
+
+import org.hibernate.transform.AliasToEntityMapResultTransformer
+
+class OrganisationService {
+
+    def sessionFactory
+
+    List&lt;Map&lt;String,Object&gt;&gt; breadcrumbs(final Long startOrganisationId) {
+        final session = sessionFactory.currentSession
+
+        final String query = 'select id, name, level from organisation_breadcrumbs(:startId) order by level desc'
+
+        final sqlQuery = session.createSQLQuery(query)
+
+        final results = sqlQuery.with {
+            // Assign result transformer.
+            // This transformer will map columns to keys in a map for each row.
+            resultTransformer = AliasToEntityMapResultTransformer.INSTANCE             
+
+            setLong('startId', startOrganisationId)
+
+            list()
+        }
+
+        results
+    }
+
+}
+</pre><p>Finally we can execute a native SQL query and handle the raw results ourselves using the Groovy Collection API enhancements. The result of the <code>list()</code> method is a <code>List</code> of <code>Object[]</code> objects. In the following sample we use Groovy syntax to handle the results:</p><pre class="brush:groovy">// File: grails-app/services/com/mrhaki/grails/OrganisationService.groovy
+package com.mrhaki.grails
+
+class OrganisationService {
+
+    def sessionFactory
+
+    List&lt;Map&lt;String,String&gt;&gt; breadcrumbs(final Long startOrganisationId) {
+        final session = sessionFactory.currentSession
+
+        final String query = 'select id, name, level from organisation_breadcrumbs(:startId) order by level desc'
+
+        final sqlQuery = session.createSQLQuery(query)
+
+        final queryResults = sqlQuery.with {
+            setLong('startId', startOrganisationId)
+            list()
+        }
+
+        // Transform resulting rows to a map with key organisationName.
+        final results = queryResults.collect { resultRow -&gt
+            [organisationName: resultRow[1]]
+        }
+
+        // Or to only get a list of names.
+        //final List&lt;String&gt; names = queryResults.collect { it[1] }
+
+        results
+    }
+
+}
+</pre><p>Code written with Grails 2.3.7.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

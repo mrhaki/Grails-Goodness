@@ -1,0 +1,77 @@
+<html>
+<head>
+
+<title>Grails Goodness: Pretty Print XML and JSON Output</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Pretty Print XML and JSON Output</h3>
+
+<div class="post">
+<p>If our Grails application renders XML or JSON output we can set configuration properties to enable pretty printing. This can be useful in for example in the development environment where we enable pretty printing and disable it for other environments. We set the configuration property <code>grails.converters.default.pretty.print</code> with the value <code>true</code> to enable pretty printing for both XML and JSON output. If we only want to pretty print XML we use the property <code>grails.converters.xml.pretty.print</code> and for JSON we use <code>grails.converters.json.pretty.print</code>.</p><p>First we look at the XML and JSON output when we don't enable pretty printing for a simple book resource:</p><pre class="brush:xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;book id="1"&gt;&lt;isbn&gt;0451169514&lt;/isbn&gt;&lt;numberOfPages&gt;1104&lt;/numberOfPages&gt;&lt;title&gt;It&lt;/title&gt;&lt;/book&gt;
+</pre><pre class="brush:plain">{"class":"com.mrhaki.grails.sample.Book","id":1,"isbn":"0451169514","numberOfPages":1104,"title":"It"}
+</pre><p>Now we get the same book resource but with the following <code>grails-app/conf/Config.groovy</code> snippet:</p><pre class="brush:groovy">...
+environments {
+    development {
+        // Enable pretty print for JSON.
+        //grails.converters.json.pretty.print = true
+
+        // Enable pretty print for XML.
+        //grails.converters.xml.pretty.print = true
+
+        // Enable pretty print for JSON and XML.
+        grails.converters.default.pretty.print = true
+        ...
+    }
+}        
+...
+</pre><p>The following output shows how the representation is formatted nicely:</p><pre class="brush:xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;book id="1"&gt;
+  &lt;isbn&gt;
+    0451169514
+  &lt;/isbn&gt;
+  &lt;numberOfPages&gt;
+    1104
+  &lt;/numberOfPages&gt;
+  &lt;title&gt;
+    It
+  &lt;/title&gt;
+&lt;/book&gt;
+</pre><pre class="brush:plain">{
+  "class": "com.mrhaki.grails.sample.Book",
+  "id": 1,
+  "isbn": "0451169514",
+  "numberOfPages": 1104,
+  "title": "It"
+}
+</pre><p>Code written with Grails 2.3.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

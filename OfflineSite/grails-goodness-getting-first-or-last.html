@@ -1,0 +1,59 @@
+<html>
+<head>
+
+<title>Grails Goodness: Getting First or Last Instance of Domain Classes</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Getting First or Last Instance of Domain Classes</h3>
+
+<div class="post">
+<p>Since Grails 2 we can get the first or last instance of a domain class with the <code>first()</code> and <code>last()</code> method on domain classes. We can optionally use an argument to set the column name to sort by. If we don't specify a column name the <code>id</code> column is used.</p><pre class="brush:groovy">import com.mrhaki.grails.Course
+
+createCourse 'Grails University Getting Started', Date.parse('yyyy-MM-dd', '2013-11-01')
+createCourse 'Grails University RESTful Applications'
+createCourse 'Spock Sessions', Date.parse('yyyy-MM-dd', '2013-09-01')
+
+void createCourse(final String name, final Date start = null) {
+    new Course(name: name, start: start).save()
+}
+
+assert Course.first().name == 'Grails University Getting Started'
+assert Course.first().start.format('yyyy-MM-dd') == '2013-11-01'
+
+assert Course.last().name == 'Spock Sessions'
+assert Course.last('name').name == 'Spock Sessions'
+
+assert Course.last('start').name == 'Grails University Getting Started'
+assert Course.first(sort: 'start').start == null
+</pre
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

@@ -25,17 +25,11 @@
 <h3 class="post-title">Grails Goodness: Templates Can Have a Body</h3>
 
 <div class="post">
-<p>To create a more modular Groovy Server Page we can use Grails' <a href="http://grails.org/doc/latest/guide/single.html#6.2.3%20Views%20and%20Templates">template</a> support. We use <code>&lt;g:render template="..." ... /&gt;</code> or <code>&lt;tmpl:templateName ... /&gt;</code> tags to render the template content. These tags can have a body. The body of the tag is then available in the template code. We use the expression <code>${body()}</code> in our template to output the body content.</p>
-<p>Suppose we have the following template code:</p>
-<pre class="brush:html">
-&lt;%-- File: grails-app/views/product/_productView.gsp --%&gt;
+<p>To create a more modular Groovy Server Page we can use Grails' <a href="http://grails.org/doc/latest/guide/single.html#6.2.3%20Views%20and%20Templates">template</a> support. We use <code>&lt;g:render template="..." ... /&gt;</code> or <code>&lt;tmpl:templateName ... /&gt;</code> tags to render the template content. These tags can have a body. The body of the tag is then available in the template code. We use the expression <code>${body()}</code> in our template to output the body content.</p><p>Suppose we have the following template code:</p><pre class="brush:html">&lt;%-- File: grails-app/views/product/_productView.gsp --%&gt;
 &lt;h2&gt;${product.name}&lt;/h2&gt;
 
 ${body()}
-</pre>
-<p>We can use the template with different body contents:</p>
-<pre class="brush:html">
-...
+</pre><p>We can use the template with different body contents:</p><pre class="brush:html">...
 &lt;g:each in="${products}" var="product"&gt;
     &lt;g:render template="productView" model="[product: product]"&gt;
         &lt;g:link uri="/"&gt;Back to home&lt;/g:link&gt;
@@ -48,7 +42,7 @@ ${body()}
     &lt;/tmpl:productView&gt;
 &lt;/g:each&gt;
 ...
-</pre
+</pre><p>If the content of the body has HTML tags and we have set in <code>grails-app/conf/Config.groovy</code> the property <code>grails.views.default.codec</code> to <code>html</code> we get escaped HTML. Instead of using <code>${body()}</code> we must then use <code>&lt;%= body() %&gt;</code>.</p
 </div>
 
 <script language="javascript"> 

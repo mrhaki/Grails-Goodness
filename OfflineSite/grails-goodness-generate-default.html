@@ -1,0 +1,76 @@
+<html>
+<head>
+
+<title>Grails Goodness: Generate Default .gitignore Or .hgignore File</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Generate Default .gitignore Or .hgignore File</h3>
+
+<div class="post">
+<p>We can use the <code>integrateWith</code> command with Grails to generate for example IDE project files and build system files. We specify via an extra argument the type of files to be generated. We can use this command also to create a <code>.gitignore</code> file with some default settings for files to be ignored in Grails projects.</p><pre class="light:true;brush:plain">$ grails integrate-with --git
+</pre><p>In the root of our project we have now have a <code>.gitignore</code> file with the following contents:</p><pre class="light:true;brush:plain">*.iws
+*Db.properties
+*Db.script
+.settings
+stacktrace.log
+/*.zip
+/plugin.xml
+/*.log
+/*DB.*
+/cobertura.ser
+.DS_Store
+/target/
+/out/
+/web-app/plugins
+/web-app/WEB-INF/classes
+/.link_to_grails_plugins/
+/target-eclipse/
+</pre><p>If we would use Mercurial then we can generate a <code>.hgignore</code> file with the argument <code>--hg</code>:</p><pre class="brush:plain;light:true">$ grails integrate-with --hg
+</pre><p>The <code>.hgignore</code> file has the following contents:</p><pre class="brush:plain;light:true">syntax: glob
+*.iws
+*Db.properties
+*Db.script
+.settings
+stacktrace.log
+*.zip
+plugin.xml
+*.log
+*DB.*
+cobertura.ser
+.DS_Store
+target/
+out/
+web-app/plugins
+web-app/WEB-INF/classes
+</pre><p>Samples written with Grails 2.3.7.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

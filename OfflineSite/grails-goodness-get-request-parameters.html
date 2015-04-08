@@ -1,0 +1,112 @@
+<html>
+<head>
+
+<title>Grails Goodness: Get Request Parameters with Default Values</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Get Request Parameters with Default Values</h3>
+
+<div class="post">
+<p>In Grails we can <a href="http://mrhaki.blogspot.com/2010/02/grails-goodness-type-conversion-on.html">convert a request parameter to a type</a> directly. We must then use the <code>int()</code>, <code>short()</code>, <code>byte()</code>, <code>long()</code>, <code>double()</code>, <code>float()</code>, <code>boolean()</code> or <code>list()</code> methods that are added to the <code>params</code> object available in our controllers.</p><p>Since Grails 2.3 we can also pass a default value, which is used when the request parameter is not set. In the following controller we use the <code>double()</code> method and define a default value of <code>42.0</code>.</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/SampleController.groovy
+package com.mrhaki.grails
+
+class SampleController {
+
+    def index() {
+        // Get request parameter named v.
+        // Use default value 42.0 if not set.
+        final double value = params.double('v', 42.0)
+        [value: value]
+    }
+
+}
+</pre><p>The following test shows that the default value is returned if the request parameter is not set, otherwise the value of the request parameter is returned:</p><pre class="brush:groovy">// File: test/unit/com/mrhaki/grails/SampleControllerSpec.groovy
+package com.mrhaki.grails
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SampleController)
+class SampleControllerSpec extends Specification {
+
+    def "request parameter v must return default value if not set"() {
+        expect:
+        controller.index().value == 42.0
+    }
+
+    def "request parameter v must return value set"() {
+        given:
+        params.v = '10.1'
+
+        expect:
+        controller.index().value == 10.1
+    }
+
+}
+</pre><p>We can use the same methods now also to get attribute values in a tag library. So we can do a type conversion and provide a default value if we want to. In the following tag library we use this in the tag <code>sample</code>:</p><pre class="brush:groovy">// File: grails-app/taglib/com/mrhaki/grails/SampleTagLib.groovy
+package com.mrhaki.grails
+
+class SampleTagLib {
+
+    static namespace = 'sample'
+
+    static returnObjectForTags = ['sample']
+
+    def sample = { attributes, body ->
+        final double value = attributes.double('v', 42.0)
+        value
+    }
+    
+}
+</pre><p>With the following Spock specification we can see that the default value <code>42.0</code> is used if the attribute <code>v</code> is not set. Otherwise the value of the attribute is returned:</p><pre class="brush:groovy">// File: test/unit/com/mrhaki/grails/SampleTagLibSpec.groovy
+package com.mrhaki.grails
+
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SampleTagLib)
+class SampleTagLibSpec extends Specification {
+
+    def "attribute v returns default value if attribute is not set"() {
+        expect:
+        applyTemplate('&lt;sample:sample/&gt;') == '42.0'
+    }
+
+    def "attribute v returns value if attribute v if set"() {
+        expect:
+        applyTemplate('&lt;sample:sample v="${v}"/&gt;', [v: 10.1]) == '10.1'
+    }
+
+}
+</pre><p>Code written with Grails 2.3.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

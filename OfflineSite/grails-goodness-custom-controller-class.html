@@ -1,0 +1,90 @@
+<html>
+<head>
+
+<title>Grails Goodness: Custom Controller Class with Resource Annotation</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Custom Controller Class with Resource Annotation</h3>
+
+<div class="post">
+<p>In Grails we can apply the <code>@Resource</code> AST (Abstract Syntax Tree) annotation to a domain class. Grails will generate a complete new controller which by default extends <code>grails.rest.RestfulController</code>. We can use our own controller class that will be extended by the <code>@Resource</code> transformation. For example we might want to disable the <code>delete</code> action, but still want to use the <code>@Resource</code> transformation. We simply write a new <code>RestfulController</code> implementation and use the <code>superClass</code> attribute for the annotation to assign our custom controller as the value.</p><p>First we write a new <code>RestfulController</code> and we override the <code>delete</code> action. We return a HTTP status code 405 Method not allowed:</p><pre class="brush:groovy">// File: grails-app/controllers/com/mrhaki/grails/NonDeleteRestfulController.groovy
+package com.mrhaki.grails
+
+import grails.rest.*
+
+import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED
+
+/**
+ * Custom RestfulController where we disable the delete action.
+ */
+class NonDeleteRestfulController&lt;T&gt; extends RestfulController&lt;T&gt; {
+
+    // We need to provide the constructors, so the 
+    // Resource transformation works.
+    NonDeleteRestfulController(Class&lt;T&gt; domainClass) {
+        this(domainClass, false)
+    }
+
+    NonDeleteRestfulController(Class&lt;T&gt; domainClass, boolean readOnly) {
+        super(domainClass, readOnly)
+    }
+
+    @Override
+    def delete() {
+        // Return Method not allowed HTTP status code.
+        render status: METHOD_NOT_ALLOWED
+    }
+    
+}
+</pre><p>Next we indicate in the <code>@Resource</code> annotation with the <code>superClass</code> attribute that we want to use the <code>NonDeleteRestfulController</code>:</p><pre class="brush:groovy">// File: grails-app/domain/com/mrhaki/grails/User.groovy
+package com.mrhaki.grails
+
+import grails.rest.*
+
+@Resource(uri = '/users', superClass = NonDeleteRestfulController)
+class User {
+
+    String username
+    String lastname
+    String firstname
+    String email
+
+    static constraints = {
+        email email: true
+        lastname nullable: true
+        firstname nullable: true
+    }
+
+}
+</pre><p>When we access the resource <code>/users/{id}</code> with the HTTP <code>DELETE</code> method we get a <code>405 Method Not Allowed</code> response status code.</p><p>Written with Grails 2.4.2.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

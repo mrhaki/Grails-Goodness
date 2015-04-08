@@ -1,0 +1,118 @@
+<html>
+<head>
+
+<title>Grails Goodness: Run Groovy Scripts in Grails Context</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Run Groovy Scripts in Grails Context</h3>
+
+<div class="post">
+<p>We can use the <a href="http://grails.org/doc/latest/ref/Command%20Line/run-script.html"><code>run-script</code></a> command to run Groovy scripts within the context of a Grails application. We can pass one or more Groovy scripts as argument to the <code>run-script</code> command. The Grails environment will be configured and we can access the Spring application context, domain classes, Grails services and more. Basically everything we can do in the Grails console or shell can be saved as a Groovy script and run with the <code>run-script</code> command.</p><p>The following Groovy script shows some stats for a Grails application:</p><pre class="brush:groovy">// File: src/scripts/appstatus.groovy
+import grails.util.Environment
+import static grails.util.Metadata.current as metaInfo
+
+header 'Application Status'
+row 'App version', metaInfo['app.version']
+row 'Grails version', metaInfo['app.grails.version']
+row 'Groovy version', GroovySystem.version
+row 'JVM version', System.getProperty('java.version')
+row 'Reloading active', Environment.reloadingAgentEnabled
+row 'Controllers', grailsApplication.controllerClasses.size()
+row 'Domains', grailsApplication.domainClasses.size()
+row 'Services', grailsApplication.serviceClasses.size()
+row 'Tag Libraries', grailsApplication.tagLibClasses.size()
+println()
+
+header 'Installed Plugins'
+ctx.getBean('pluginManager').allPlugins.each { plugin ->
+    row plugin.name, plugin.version
+}
+
+void row(final String label, final value) {
+    println label.padRight(18) + ' : ' + value.toString().padLeft(8)
+}
+
+void header(final String title) {
+    final int length = 29
+    println '-' * length
+    println title.center(length)
+    println '-' * length
+}
+</pre><p>We can invoke the script with the following command:</p><pre class="brush:plain;light:true">$ grails run-script src/scripts/appstatus.groovy
+| Running script src/scripts/appstatus.groovy ...
+-----------------------------
+     Application Status
+-----------------------------
+App version        :      0.1
+Grails version     :    2.4.0
+Groovy version     :    2.3.1
+JVM version        : 1.7.0_51
+Reloading active   :    false
+Controllers        :        2
+Domains            :        0
+Services           :        3
+Tag Libraries      :       15
+
+-----------------------------
+      Installed Plugins
+-----------------------------
+i18n               :    2.4.0
+logging            :    2.4.0
+dataBinding        :    2.4.0
+restResponder      :    2.4.0
+core               :    2.4.0
+codecs             :    2.4.0
+urlMappings        :    2.4.0
+jquery             :   1.11.1
+databaseMigration  :    1.4.0
+assetPipeline      :    1.8.7
+webxml             :    1.4.1
+tomcat             :   7.0.53
+controllers        :    2.4.0
+filters            :    2.4.0
+servlets           :    2.4.0
+mimeTypes          :    2.4.0
+dataSource         :    2.4.0
+groovyPages        :    2.4.0
+domainClass        :    2.4.0
+controllersAsync   :    2.4.0
+converters         :    2.4.0
+scaffolding        :    2.1.0
+hibernate4         :  4.3.5.3
+validation         :    2.4.0
+services           :    2.4.0
+cache              :    1.1.6
+| Script src/scripts/appstatus.groovy complete!
+$
+</pre><p>Code written with Grails 2.4.0.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

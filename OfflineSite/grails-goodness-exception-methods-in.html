@@ -1,0 +1,114 @@
+<html>
+<head>
+
+<title>Grails Goodness: Exception Methods in Controllers</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Exception Methods in Controllers</h3>
+
+<div class="post">
+<p>Since Grails 2.3 we can define <em>exception</em> methods in our controllers to handle exceptions raised by code invoked in the action methods of the controllers. Normally we would write a <code>try/catch</code> statement to handle an exception or let it continue up the stack until a <code>500</code> error page is shown. But with exception methods we can write code to handle exceptions in a controller without a <code>try/catch</code> statement. An exception method should define the type of exception it handles as the method argument. We can have multiple exception methods for different exception types. Also subclasses of a controller will use the exception methods if applicable.</p><p>In the following controller we have a couple of action methods: <code>index</code> and <code>show</code>. And we have two exception methods: <code>connectException</code> and <code>notFoundException</code>. The <code>connectException</code> method has a single argument of type <code>ConnectException</code>. This means that any code in the controller that will raise a <code>ConnectException</code> will be handled by this method. And any <code>ResourceNotFoundException</code> thrown in the controller will be handled by the <code>notFoundException</code> method, because the argument type is <code>ResourceNotFoundException</code>.</p><pre class="brush:groovy">package com.mrhaki.grails
+
+class SampleController {
+
+    /**
+     * Service with methods that are invoked
+     * from the controller action methods.
+     */ 
+    ExternalService externalService
+
+    //--------------------------------------------
+    // Action methods:
+    //--------------------------------------------
+
+    /** Index action method */
+    def index() { 
+
+        // These method calls could throw a ConnectException.
+        // If the ConnectException occurs then the 
+        // connectException(ConnectException) method is
+        // invoked and that method will handle the 
+        // request further.
+        final all = externalService.all(params)
+        final total = externalService.count()
+        
+        [items: all, totalCount: total]
+    }
+
+    /** Show action method */
+    def show(final Long id) {
+
+        // This method can throw a ConnectException
+        // or ResourceNotFoundException. 
+        // If the ResourceNotFoundException is thrown
+        // the request is further handled by 
+        // the notFoundException(ResourceNotFoundException)
+        // method.
+        final item = externalService.get(id)
+        [item: item]
+    }
+
+
+    //--------------------------------------------
+    // Exception methods:
+    //--------------------------------------------
+
+    /**
+     * If any method in this controller invokes code that
+     * will throw a ConnectException then this method
+     * is invoked.
+     */
+    def connectException(final ConnectException exception) {
+        logException exception
+        render view: 'error', model: [exception: exception]
+    }
+
+    /**
+     * If any method in this controller invokes code that
+     * will throw a ResourceNotFoundException then this method
+     * is invoked.
+     */
+    def notFoundException(final ResourceNotFoundException exception) {
+        logException exception
+        render view: 'notFound',  model: [id: params.id, exception: exception]        
+    }
+
+
+    /** Log exception */
+    private void logException(final Exception exception) {
+        log.error "Exception occurred. ${exception?.message}", exception
+    }
+
+}
+</pre><p>Code written with Grails 2.4.0.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>

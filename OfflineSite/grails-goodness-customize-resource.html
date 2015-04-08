@@ -1,0 +1,70 @@
+<html>
+<head>
+
+<title>Grails Goodness: Customize Resource Mappings</title>
+
+<script language="javascript" src="scripts/shCore.js"></script> 
+<script language="javascript" src="scripts/shLegacy.js"></script> 
+<script language="javascript" src="scripts/shBrushJava.js"></script> 
+<script language="javascript" src="scripts/shBrushXml.js"></script> 
+<script language="javascript" src="scripts/shBrushJScript.js"></script> 
+<script language="javascript" src="scripts/shBrushGroovy.js"></script> 
+<script language="javascript" src="scripts/shBrushPlain.js"></script> 
+<script language="javascript" src="scripts/shBrushBash.js"></script> 
+ 
+<link href="styles/reset.css" rel="stylesheet" type="text/css" />
+<link href="styles/shCore.css" rel="stylesheet" type="text/css" />
+<link type="text/css" rel="stylesheet" href="styles/shThemeRDark.css"/>
+<link href="styles/blog.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+<a href="index.html">Back to index</a>
+
+<h3 class="post-title">Grails Goodness: Customize Resource Mappings</h3>
+
+<div class="post">
+<p>Since Grails 2.3 it is very easy to define RESTful URL mappings for a controller. We can use the <code>resources</code> and <code>resource</code> attribute and use a controller name as the value. Grails will then automatically create a couple of URL mappings. Suppose we use the following mapping in <code>grails-app/conf/UrlMappings.groovy</code>: <code>"/api/users"(resources: 'user')</code>, then the following mappings are automatically created:</p><pre class="brush:groovy">"/api/users/create"(controller: 'user', action: 'create', method: 'GET')
+"/api/users/(*)/edit"(controller: 'user', action: 'edit', method: 'GET')
+"/api/users(.(*))?"(controller: 'user', action: 'save', method: 'POST')
+"/api/users(.(*))?"(controller: 'user', action: 'index', method: 'GET')
+"/api/users/(*)(.(*))?"(controller: 'user', action: 'delete', method: 'DELETE')
+"/api/users/(*)(.(*))?"(controller: 'user', action: 'update', method: 'PUT')
+"/api/users/(*)(.(*))?"(controller: 'user', action: 'show', method: 'GET')
+</pre><p>When we use the <code>resource</code> attribute to define a mapping like <code>"/api/user"(resource: 'user')</code> the following mappings are created by Grails:</p><pre class="brush:groovy">"/api/user/create"(controller: 'user', action: 'create', method: 'GET')
+"/api/user/edit"(controller: 'user', action: 'edit', method: 'GET')
+"/api/user(.(*))?"(controller: 'user', action: 'delete', method: 'DELETE')
+"/api/user(.(*))?"(controller: 'user', action: 'update', method: 'PUT')
+"/api/user(.(*))?"(controller: 'user', action: 'save', method: 'POST')
+</pre><p>Well there a lot of mappings created for us! But maybe we don't need all created mappings in our application. For example the mappings with <code>/create</code> and <code>/edit</code> are created by Grails to support also a UI variant for the controller actions, but we might want to leave them out when we only deal with JSON or XML payloads. We can use the <code>includes</code> and <code>excludes</code> attributes on the mapping to explicitly define which actions we want to support in our controller.</p><p>In the following sample <code>UrlMappings.groovy</code> configuration we exclude the <code>create</code> and <code>edit</code> actions in the first mapping. In the second mapping we only include the <code>show</code> and <code>index</code> actions:</p><pre class="brush:groovy">// File: grails-app/conf/UrlMappings.groovy
+import static org.codehaus.groovy.grails.web.mapping.DefaultUrlMappingEvaluator.*
+
+import org.codehaus.groovy.grails.web.mapping.DefaultUrlMappingEvaluator
+
+class UrlMappings {
+
+    static mappings = {
+        // Exclude the 'create' and 'edit' actions for the 
+        // automatically created mappings.
+        "/api/users"(resources: 'user', excludes: [ACTION_CREATE, ACTION_EDIT])
+
+        // Include only the 'index' and 'show' actions for the 
+        // automatically created mappings.
+        "/api/products"(resources: 'product', includes: [ACTION_INDEX, ACTION_SHOW])
+    }
+}
+</pre><p>Code written with Grails 2.3.</p
+</div>
+
+<script language="javascript"> 
+SyntaxHighlighter.config.bloggerMode = true;
+SyntaxHighlighter.config.clipboardSwf = 'scripts/clipboard.swf';
+SyntaxHighlighter.defaults['first-line'] = 0;
+SyntaxHighlighter.defaults['auto-links'] = false;
+SyntaxHighlighter.all();
+dp.SyntaxHighlighter.HighlightAll('code');
+</script>
+
+</body>
+</html>
